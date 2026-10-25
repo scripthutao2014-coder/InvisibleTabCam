@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gesture Invisibility Suite - Full Native Canvas Edition</title>
+    <title>Gesture Invisibility Suite - Pro Edition</title>
     
     <!-- MediaPipe AI Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
@@ -60,6 +60,7 @@
             align-items: center;
             justify-content: space-between;
             height: 64px;
+            transition: opacity 0.3s;
         }
 
         .header-title-group {
@@ -137,6 +138,7 @@
             max-width: 1800px;
             width: 100%;
             margin: 0 auto;
+            transition: all 0.3s ease;
         }
 
         /* Left Column - Video Canvas Viewport */
@@ -394,7 +396,7 @@
         }
 
         /* ==========================================================================
-           4. MODAL OVERLAYS & NOTIFICATIONS
+           4. MODAL OVERLAYS & CLEAN WEB FULLSCREEN MODE
            ========================================================================== */
         .modal-overlay {
             position: fixed;
@@ -469,6 +471,48 @@
             display: none !important;
         }
 
+        /* Full Clean Mode Classes */
+        body.full-clean-mode header {
+            display: none !important;
+        }
+
+        body.full-clean-mode .control-panel {
+            display: none !important;
+        }
+
+        body.full-clean-mode .workspace {
+            padding: 0 !important;
+            margin: 0 !important;
+            max-width: 100vw !important;
+            height: 100vh !important;
+        }
+
+        body.full-clean-mode .viewport-section {
+            border: none !important;
+            border-radius: 0 !important;
+            padding: 0 !important;
+            background: #000000 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            max-width: 100vw !important;
+            max-height: 100vh !important;
+        }
+
+        body.full-clean-mode .canvas-container {
+            max-width: 100vw !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            border: none !important;
+            border-radius: 0 !important;
+            aspect-ratio: auto !important;
+        }
+
+        body.full-clean-mode .overlay-status-container,
+        body.full-clean-mode .overlay-gesture-container,
+        body.full-clean-mode .viewport-toolbar {
+            display: none !important;
+        }
+
         /* Animations */
         @keyframes pulse {
             0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(247, 243, 235, 0.7); }
@@ -492,6 +536,9 @@
         </div>
         <div class="header-controls">
             <span id="status-badge" class="badge">CAM OFF</span>
+            <button class="btn-secondary" onclick="App.toggleFullCleanMode()" title="Mode Tampilan Bersih (Satu Web Full Tanpa Teks/Indikator)">
+                📺 Clean Web Mode
+            </button>
             <button id="btn-toggle-cam" class="btn-primary" onclick="App.toggleCamera()">Start WebCam</button>
         </div>
     </header>
@@ -540,7 +587,10 @@
                     <span>📁</span> Upload Foto Background
                     <input type="file" id="bg-file-input" accept="image/*" style="display: none;" onchange="App.uploadBackground(event)">
                 </label>
-                <span style="font-size: 0.75rem; color: var(--text-muted);">atau drag & drop foto ke canvas</span>
+                <button class="btn-secondary" onclick="App.toggleFullCleanMode()">
+                    <span>📺</span> Clean Mode (F/Esc)
+                </button>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">Tekan 1-5 untuk Zoom 1x-5x</span>
             </div>
         </section>
 
@@ -573,6 +623,15 @@
                     <span style="font-size: 0.68rem; color: var(--text-muted);">Makin besar nilai, makin luas area kotak menutupi tubuh & baju.</span>
                 </div>
 
+                <div class="form-group">
+                    <div class="form-label-row">
+                        <span style="color: var(--text-secondary);">Zoom Kamera (Face/Body)</span>
+                        <span id="zoom-val" style="color: var(--cream-accent); font-weight: 600;">1.0x</span>
+                    </div>
+                    <input type="range" id="cam-zoom-slider" class="slider-custom" min="1.0" max="5.0" step="0.1" value="1.0" oninput="App.setZoomLevel(this.value)">
+                    <span style="font-size: 0.68rem; color: var(--text-muted);">Gunakan gesture 🤏 (Zoom In) / 👐 (Zoom Out) atau tekan tombol 1,2,3,4,5.</span>
+                </div>
+
                 <div class="checkbox-row">
                     <div>
                         <div style="font-size: 0.8rem; font-weight: 500;">Lock Ukuran Fixed</div>
@@ -593,6 +652,29 @@
                 </div>
             </div>
 
+            <!-- Section: Music & Audio Settings -->
+            <div class="panel-section">
+                <div class="panel-section-title">Music & Disco Party Audio</div>
+                
+                <div class="checkbox-row">
+                    <div>
+                        <div style="font-size: 0.8rem; font-weight: 500;">Aktifkan Sound & Disco</div>
+                        <div style="font-size: 0.68rem; color: var(--text-muted);">Jalankan efek suara/musik saat gesture 🤟 aktif</div>
+                    </div>
+                    <input type="checkbox" id="audio-enable-toggle" class="checkbox-custom" checked onchange="App.toggleAudioEnable(this.checked)">
+                </div>
+
+                <div class="form-group">
+                    <label style="font-size: 0.68rem; color: var(--text-muted);">Custom Audio File (MP3)</label>
+                    <input type="file" id="audio-file-input" accept="audio/*" class="input-custom" onchange="App.uploadAudioFile(event)">
+                </div>
+
+                <div class="form-group">
+                    <label style="font-size: 0.68rem; color: var(--text-muted);">Audio / Track Link (MP3 URL)</label>
+                    <input type="text" id="audio-url-input" class="input-custom" placeholder="https://example.com/music.mp3" onchange="App.setAudioUrl(this.value)">
+                </div>
+            </div>
+
             <!-- Section: Gesture Triggers -->
             <div class="panel-section">
                 <div class="panel-section-title">Custom Gesture Mapping</div>
@@ -603,9 +685,9 @@
                     </div>
                     <select id="gesture-hide" class="select-custom">
                         <option value="2_fingers">✌️ Jari 2 (Peace)</option>
+                        <option value="pointing">☝️ Telunjuk</option>
                         <option value="open_palm">🤚 Telapak Tangan</option>
                         <option value="fist">✊ Kepalan Tangan</option>
-                        <option value="rock">🤘 Metal / Rock</option>
                     </select>
                 </div>
 
@@ -615,9 +697,20 @@
                     </div>
                     <select id="gesture-show" class="select-custom">
                         <option value="open_palm">🤚 Telapak Tangan</option>
+                        <option value="pointing">☝️ Telunjuk</option>
                         <option value="2_fingers">✌️ Jari 2 (Peace)</option>
                         <option value="fist">✊ Kepalan Tangan</option>
                     </select>
+                </div>
+
+                <div class="form-group" style="margin-top: 0.5rem; font-size: 0.72rem; color: var(--text-muted); line-height: 1.4;">
+                    <strong>Special Gestures:</strong><br>
+                    🖕 <strong>Middle Finger:</strong> Turn Cam OFF (Shutoff)<br>
+                    🫰 <strong>Finger Heart:</strong> Love Rain Effect ❤️<br>
+                    👌 <strong>OK Sign:</strong> Show OK Badge Overlay 👌<br>
+                    🤟 <strong>Rock / Disco:</strong> Party Lights & Sound 🪩<br>
+                    👐 <strong>Open Hands:</strong> Zoom Out<br>
+                    🤏 <strong>Pinch Hand:</strong> Zoom In
                 </div>
             </div>
 
@@ -665,11 +758,14 @@
                 btnModeBox: document.getElementById('btn-mode-box'),
                 btnModeSeg: document.getElementById('btn-mode-seg'),
                 scaleVal: document.getElementById('scale-val'),
+                zoomVal: document.getElementById('zoom-val'),
+                camZoomSlider: document.getElementById('cam-zoom-slider'),
                 lockDimensions: document.getElementById('lock-dimensions'),
                 gestureHide: document.getElementById('gesture-hide'),
                 gestureShow: document.getElementById('gesture-show'),
                 fixedW: document.getElementById('fixed-w'),
-                fixedH: document.getElementById('fixed-h')
+                fixedH: document.getElementById('fixed-h'),
+                audioEnableToggle: document.getElementById('audio-enable-toggle')
             };
 
             const ctx = DOM.canvas.getContext('2d');
@@ -679,6 +775,32 @@
             let isCamActive = false;
             let isInvisible = false;
             let invisEngineMode = 'box'; // 'box' or 'seg'
+            let isFullCleanMode = false;
+
+            // Zoom & Scale State
+            let zoomLevel = 1.0; // 1.0 to 5.0
+            let lastZoomGestureTime = 0;
+
+            // Special Effects State
+            let loveParticles = [];
+            let isLoveEffectActive = false;
+            let isOkEffectActive = false;
+            let okEffectTimer = null;
+            let isDiscoEffectActive = false;
+            let discoFrameCount = 0;
+
+            // Audio & Music Engine
+            let isAudioEnabled = true;
+            let audioPlayer = new Audio();
+            audioPlayer.loop = true;
+            let webAudioCtx = null;
+            let discoOscillator = null;
+
+            // OK Image Asset Load (Fallback gracefully if offline)
+            let okImage = new Image();
+            okImage.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=60';
+            let isOkImageLoaded = false;
+            okImage.onload = () => { isOkImageLoaded = true; };
 
             // Background Buffers
             let bgCanvas = document.createElement('canvas');
@@ -735,11 +857,7 @@
              */
             function toggleCamera() {
                 if (isCamActive) {
-                    if (cameraPipeline) cameraPipeline.stop();
-                    isCamActive = false;
-                    DOM.statusBadge.innerText = "CAM OFF";
-                    DOM.statusBadge.className = "badge";
-                    DOM.btnToggleCam.innerText = "Start WebCam";
+                    shutOffCamera();
                 } else {
                     initCamera();
                     isCamActive = true;
@@ -747,6 +865,23 @@
                     DOM.statusBadge.className = "badge badge-live";
                     DOM.btnToggleCam.innerText = "Stop WebCam";
                 }
+            }
+
+            function shutOffCamera() {
+                if (cameraPipeline) {
+                    try { cameraPipeline.stop(); } catch(e){}
+                }
+                isCamActive = false;
+                DOM.statusBadge.innerText = "CAM OFF";
+                DOM.statusBadge.className = "badge";
+                DOM.btnToggleCam.innerText = "Start WebCam";
+                stopDiscoAudio();
+                
+                // Clear Canvas to Black
+                const w = DOM.canvas.width || 1280;
+                const h = DOM.canvas.height || 720;
+                ctx.fillStyle = '#000000';
+                ctx.fillRect(0, 0, w, h);
             }
 
             function initCamera() {
@@ -783,8 +918,19 @@
 
                 ctx.save();
                 ctx.clearRect(0, 0, w, h);
-                ctx.drawImage(DOM.webcam, 0, 0, w, h);
 
+                // Apply Zoom Transformation
+                if (zoomLevel > 1.0) {
+                    const zoomW = w / zoomLevel;
+                    const zoomH = h / zoomLevel;
+                    const cropX = (w - zoomW) / 2;
+                    const cropY = (h - zoomH) / 2;
+                    ctx.drawImage(DOM.webcam, cropX, cropY, zoomW, zoomH, 0, 0, w, h);
+                } else {
+                    ctx.drawImage(DOM.webcam, 0, 0, w, h);
+                }
+
+                // Invisibility Rendering
                 if (isInvisible && hasBackground) {
                     if (invisEngineMode === 'box') {
                         renderBoundingBoxInvisibility(w, h);
@@ -792,6 +938,11 @@
                         renderSegmentationInvisibility(w, h);
                     }
                 }
+
+                // Special Overlays & Particle Effects Rendering
+                renderLoveParticles(w, h);
+                renderOkOverlay(w, h);
+                renderDiscoLights(w, h);
 
                 ctx.restore();
             }
@@ -805,7 +956,6 @@
                 if (latestPoseLandmarks) {
                     let minX = 1.0, maxX = 0.0, minY = 1.0, maxY = 0.0;
                     
-                    // Lacak seluruh sendi: Kepala, telinga, bahu, siku, pergelangan, pinggang
                     const keyIndices = [0, 2, 5, 7, 8, 11, 12, 13, 14, 15, 16, 23, 24];
                     keyIndices.forEach(idx => {
                         const lm = latestPoseLandmarks[idx];
@@ -836,13 +986,11 @@
                     }
                 }
 
-                // Perhalus Pergerakan Box (Smoothing)
                 smoothBox.x += (targetX - smoothBox.x) * 0.25;
                 smoothBox.y += (targetY - smoothBox.y) * 0.25;
                 smoothBox.w += (targetW - smoothBox.w) * 0.25;
                 smoothBox.h += (targetH - smoothBox.h) * 0.25;
 
-                // Timpa area kotak dengan foto background
                 ctx.save();
                 ctx.beginPath();
                 ctx.rect(smoothBox.x, smoothBox.y, smoothBox.w, smoothBox.h);
@@ -867,6 +1015,136 @@
             }
 
             /**
+             * Special Effects Renderers
+             */
+            function triggerLoveEffect() {
+                isLoveEffectActive = true;
+                for (let i = 0; i < 25; i++) {
+                    loveParticles.push({
+                        x: Math.random() * (DOM.canvas.width || 1280),
+                        y: -Math.random() * 200,
+                        speed: 2 + Math.random() * 4,
+                        size: 20 + Math.random() * 24,
+                        opacity: 1
+                    });
+                }
+            }
+
+            function renderLoveParticles(w, h) {
+                if (loveParticles.length === 0) return;
+                ctx.save();
+                ctx.font = '28px serif';
+                for (let i = loveParticles.length - 1; i >= 0; i--) {
+                    const p = loveParticles[i];
+                    p.y += p.speed;
+                    ctx.globalAlpha = p.opacity;
+                    ctx.fillText('❤️', p.x, p.y);
+                    if (p.y > h + 50) {
+                        loveParticles.splice(i, 1);
+                    }
+                }
+                ctx.restore();
+            }
+
+            function triggerOkEffect() {
+                isOkEffectActive = true;
+                if (okEffectTimer) clearTimeout(okEffectTimer);
+                okEffectTimer = setTimeout(() => { isOkEffectActive = false; }, 3000);
+            }
+
+            function renderOkOverlay(w, h) {
+                if (!isOkEffectActive) return;
+                ctx.save();
+                
+                // Draw OK Card Badge Center
+                const boxW = 280;
+                const boxH = 120;
+                const rectX = (w - boxW) / 2;
+                const rectY = h * 0.15;
+
+                ctx.fillStyle = 'rgba(18, 18, 18, 0.88)';
+                ctx.strokeStyle = '#F7F3EB';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.roundRect(rectX, rectY, boxW, boxH, 12);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = '#F7F3EB';
+                ctx.font = 'bold 36px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('OK 👌', rectX + boxW / 2, rectY + 70);
+
+                ctx.restore();
+            }
+
+            function triggerDiscoEffect() {
+                isDiscoEffectActive = true;
+                playDiscoAudio();
+                setTimeout(() => {
+                    isDiscoEffectActive = false;
+                    stopDiscoAudio();
+                }, 5000);
+            }
+
+            function renderDiscoLights(w, h) {
+                if (!isDiscoEffectActive) return;
+                discoFrameCount++;
+                ctx.save();
+                
+                // Disco Strobing Spotlights
+                const colors = ['rgba(255, 0, 100, 0.25)', 'rgba(0, 255, 200, 0.25)', 'rgba(255, 230, 0, 0.25)', 'rgba(150, 0, 255, 0.25)'];
+                const currentColor = colors[Math.floor(discoFrameCount / 10) % colors.length];
+
+                ctx.fillStyle = currentColor;
+                ctx.fillRect(0, 0, w, h);
+
+                // Disco Ball Graphic Top Center
+                ctx.fillStyle = '#F7F3EB';
+                ctx.beginPath();
+                ctx.arc(w / 2, 40, 30, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.restore();
+            }
+
+            /**
+             * Audio Engine & Sound Playback
+             */
+            function playDiscoAudio() {
+                if (!isAudioEnabled) return;
+                if (audioPlayer.src && audioPlayer.src !== '') {
+                    audioPlayer.play().catch(e => {});
+                } else {
+                    // Fallback Web Audio Synthesizer Beat
+                    try {
+                        if (!webAudioCtx) webAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                        if (webAudioCtx.state === 'suspended') webAudioCtx.resume();
+                        discoOscillator = webAudioCtx.createOscillator();
+                        const gainNode = webAudioCtx.createGain();
+                        discoOscillator.type = 'sawtooth';
+                        discoOscillator.frequency.setValueAtTime(220, webAudioCtx.currentTime);
+                        gainNode.gain.setValueAtTime(0.1, webAudioCtx.currentTime);
+                        discoOscillator.connect(gainNode);
+                        gainNode.connect(webAudioCtx.destination);
+                        discoOscillator.start();
+                    } catch(e){}
+                }
+            }
+
+            function stopDiscoAudio() {
+                try {
+                    audioPlayer.pause();
+                    audioPlayer.currentTime = 0;
+                    if (discoOscillator) {
+                        discoOscillator.stop();
+                        discoOscillator.disconnect();
+                        discoOscillator = null;
+                    }
+                } catch(e){}
+            }
+
+            /**
              * Gesture Engine Tracker
              */
             function processGestureLogic() {
@@ -880,21 +1158,64 @@
                 const middleUp = lm[12].y < lm[10].y;
                 const ringUp = lm[16].y < lm[14].y;
                 const pinkyUp = lm[20].y < lm[18].y;
+                const thumbUp = lm[4].y < lm[3].y;
 
                 let gestureFound = "unknown";
 
-                if (indexUp && middleUp && !ringUp && !pinkyUp) {
+                // Gesture Classifications
+                if (!indexUp && middleUp && !ringUp && !pinkyUp) {
+                    // 🖕 Middle Finger / F*ck Up
+                    gestureFound = "fuck_off";
+                    DOM.detectedGesture.innerText = "🖕 Shut Off Cam";
+                    shutOffCamera();
+                    return;
+                } else if (indexUp && middleUp && !ringUp && !pinkyUp) {
+                    // ✌️ 2 Fingers
                     gestureFound = "2_fingers";
                     DOM.detectedGesture.innerText = "✌️ 2 Jari";
+                } else if (indexUp && !middleUp && !ringUp && !pinkyUp) {
+                    // ☝️ Pointing Index
+                    gestureFound = "pointing";
+                    DOM.detectedGesture.innerText = "☝️ Telunjuk";
                 } else if (indexUp && middleUp && ringUp && pinkyUp) {
+                    // 🤚 Open Palm
                     gestureFound = "open_palm";
                     DOM.detectedGesture.innerText = "🤚 Telapak Tangan";
                 } else if (!indexUp && !middleUp && !ringUp && !pinkyUp) {
+                    // ✊ Fist
                     gestureFound = "fist";
                     DOM.detectedGesture.innerText = "✊ Kepal";
                 } else if (indexUp && !middleUp && !ringUp && pinkyUp) {
+                    // 🤟 Rock / Disco Sign
                     gestureFound = "rock";
-                    DOM.detectedGesture.innerText = "🤘 Metal";
+                    DOM.detectedGesture.innerText = "🤟 Disco Party!";
+                    triggerDiscoEffect();
+                } else if (indexUp && thumbUp && !middleUp && !ringUp && !pinkyUp) {
+                    // 🫰 Finger Heart / Pinch
+                    gestureFound = "heart";
+                    DOM.detectedGesture.innerText = "🫰 Finger Heart ❤️";
+                    triggerLoveEffect();
+                } else if (!indexUp && !middleUp && ringUp && pinkyUp && thumbUp) {
+                    // 👌 OK Sign
+                    gestureFound = "ok";
+                    DOM.detectedGesture.innerText = "👌 OK Sign";
+                    triggerOkEffect();
+                } else if (indexUp && middleUp && ringUp && pinkyUp && thumbUp) {
+                    // 👐 Spreading / Open Hands (Zoom Out)
+                    const now = Date.now();
+                    if (now - lastZoomGestureTime > 300) {
+                        setZoomLevel(Math.max(1.0, zoomLevel - 0.2));
+                        lastZoomGestureTime = now;
+                    }
+                    DOM.detectedGesture.innerText = "👐 Zoom Out";
+                } else if (!indexUp && !middleUp && !ringUp && !pinkyUp && thumbUp) {
+                    // 🤏 Pinching Hand (Zoom In)
+                    const now = Date.now();
+                    if (now - lastZoomGestureTime > 300) {
+                        setZoomLevel(Math.min(5.0, zoomLevel + 0.2));
+                        lastZoomGestureTime = now;
+                    }
+                    DOM.detectedGesture.innerText = "🤏 Zoom In";
                 } else {
                     DOM.detectedGesture.innerText = "Detecting...";
                 }
@@ -919,6 +1240,35 @@
                     DOM.modeDot.className = "status-dot";
                 }
             }
+
+            function setZoomLevel(val) {
+                zoomLevel = parseFloat(val);
+                DOM.zoomVal.innerText = `${zoomLevel.toFixed(1)}x`;
+                DOM.camZoomSlider.value = zoomLevel;
+            }
+
+            /**
+             * Toggle Clean Mode (Full Screen Without Indicators)
+             */
+            function toggleFullCleanMode() {
+                isFullCleanMode = !isFullCleanMode;
+                if (isFullCleanMode) {
+                    document.body.classList.add('full-clean-mode');
+                } else {
+                    document.body.classList.remove('full-clean-mode');
+                }
+            }
+
+            // Keyboard Shortcuts Handler (1-5 Zoom, F/Esc Full Clean Mode)
+            window.addEventListener('keydown', (e) => {
+                if (['1', '2', '3', '4', '5'].includes(e.key)) {
+                    setZoomLevel(parseFloat(e.key));
+                } else if (e.key.toLowerCase() === 'f') {
+                    toggleFullCleanMode();
+                } else if (e.key === 'Escape' && isFullCleanMode) {
+                    toggleFullCleanMode();
+                }
+            });
 
             /**
              * Background Capture & Interactive Ready Flow
@@ -973,6 +1323,24 @@
                     };
                     img.src = URL.createObjectURL(file);
                 }
+            }
+
+            function uploadAudioFile(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    audioPlayer.src = URL.createObjectURL(file);
+                }
+            }
+
+            function setAudioUrl(url) {
+                if (url && url.trim() !== '') {
+                    audioPlayer.src = url.trim();
+                }
+            }
+
+            function toggleAudioEnable(checked) {
+                isAudioEnabled = checked;
+                if (!checked) stopDiscoAudio();
             }
 
             /**
@@ -1031,12 +1399,17 @@
                 toggleCamera,
                 setInvisMode,
                 updateBoxScale,
+                setZoomLevel,
                 toggleLockSize,
                 updateFixedDim,
                 startReadyFlow,
                 keepBg,
                 retakeBg,
-                uploadBackground
+                uploadBackground,
+                toggleFullCleanMode,
+                uploadAudioFile,
+                setAudioUrl,
+                toggleAudioEnable
             };
         })();
     </script>
