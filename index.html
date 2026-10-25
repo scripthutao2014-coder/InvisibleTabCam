@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gesture Invisibility Suite - Full Native Canvas Edition</title>
+    
+    <!-- MediaPipe AI Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js" crossorigin="anonymous"></script>
+
+    <style>
+        /* ==========================================================================
+           1. RESET & SYSTEM VARIABLES (Monochrome & Cream Palette)
+           ========================================================================== */
+        :root {
+            --bg-main: #121212;
+            --bg-panel: #1A1A1A;
+            --bg-card: #242424;
+            --bg-hover: #2E2E2E;
+            --border-color: #333333;
+            --border-light: #444444;
+            --text-primary: #F7F3EB;
+            --text-secondary: #A0A0A0;
+            --text-muted: #666666;
+            --cream-accent: #F7F3EB;
+            --cream-hover: #FFFFFF;
+            --cream-dark: #121212;
+            --status-active: #4CAF50;
+            --status-invis: #E53935;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* ==========================================================================
+           2. HEADER LAYOUT
+           ========================================================================== */
+        header {
+            background-color: var(--bg-panel);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+        }
+
+        .header-title-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header-pulse-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--cream-accent);
+            box-shadow: 0 0 8px rgba(247, 243, 235, 0.6);
+            animation: pulse 2s infinite;
+        }
+
+        .header-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            color: var(--cream-accent);
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid var(--border-light);
+            background-color: var(--bg-card);
+            color: var(--text-secondary);
+        }
+
+        .badge-live {
+            background-color: rgba(76, 175, 80, 0.1);
+            color: #81C784;
+            border-color: rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-primary {
+            background-color: var(--cream-accent);
+            color: var(--cream-dark);
+            border: none;
+            padding: 0.5rem 1.25rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--cream-hover);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        /* ==========================================================================
+           3. MAIN CONTAINER LAYOUT
+           ========================================================================== */
+        .workspace {
+            flex: 1;
+            display: flex;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            max-width: 1800px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Left Column - Video Canvas Viewport */
+        .viewport-section {
+            flex: 1;
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            min-height: 520px;
+        }
+
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            max-width: 1024px;
+            aspect-ratio: 16 / 9;
+            background-color: #000000;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px dashed var(--border-color);
+            transition: border-color 0.2s, background-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .canvas-container.drag-over {
+            border-color: var(--cream-accent);
+            background-color: rgba(247, 243, 235, 0.03);
+        }
+
+        #webcam {
+            display: none;
+        }
+
+        #output_canvas {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* Viewport Badges Overlay */
+        .overlay-status-container {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            z-index: 10;
+        }
+
+        .overlay-badge {
+            background-color: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(4px);
+            border: 1px solid var(--border-light);
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--status-active);
+        }
+
+        .status-dot.invis {
+            background-color: var(--status-invis);
+            animation: blink 1s infinite;
+        }
+
+        .overlay-gesture-container {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            z-index: 10;
+        }
+
+        /* Toolbar Below Canvas */
+        .viewport-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.25rem;
+            width: 100%;
+        }
+
+        .btn-secondary {
+            background-color: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-light);
+            padding: 0.6rem 1.25rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--bg-hover);
+            border-color: var(--cream-accent);
+        }
+
+        /* Right Column - Controls Panel */
+        .control-panel {
+            width: 380px;
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            overflow-y: auto;
+            max-height: calc(100vh - 112px);
+        }
+
+        .panel-section {
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+        }
+
+        .panel-section-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-secondary);
+            padding-bottom: 0.25rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* Mode Switcher Buttons */
+        .mode-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+
+        .btn-mode {
+            padding: 0.75rem 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 6px;
+            border: 1px solid var(--border-light);
+            background-color: var(--bg-card);
+            color: var(--text-secondary);
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .btn-mode.active {
+            background-color: var(--cream-accent);
+            color: var(--cream-dark);
+            border-color: var(--cream-accent);
+        }
+
+        /* Form Controls */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .form-label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+        }
+
+        .slider-custom {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--bg-card);
+            outline: none;
+            accent-color: var(--cream-accent);
+            cursor: pointer;
+        }
+
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+        }
+
+        .checkbox-custom {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--cream-accent);
+            cursor: pointer;
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+
+        .input-custom {
+            width: 100%;
+            background-color: var(--bg-main);
+            border: 1px solid var(--border-light);
+            color: var(--text-primary);
+            padding: 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            outline: none;
+        }
+
+        .input-custom:focus {
+            border-color: var(--cream-accent);
+        }
+
+        .select-custom {
+            width: 100%;
+            background-color: var(--bg-main);
+            border: 1px solid var(--border-light);
+            color: var(--text-primary);
+            padding: 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .select-custom:focus {
+            border-color: var(--cream-accent);
+        }
+
+        /* Disabled State for Forms */
+        .disabled-group {
+            opacity: 0.35;
+            pointer-events: none;
+        }
+
+        /* ==========================================================================
+           4. MODAL OVERLAYS & NOTIFICATIONS
+           ========================================================================== */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 1rem;
+        }
+
+        .modal-card {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            max-width: 420px;
+            width: 100%;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 1rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-preview-box {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background-color: #000000;
+            border-radius: 6px;
+            border: 1px solid var(--border-light);
+            overflow: hidden;
+        }
+
+        .modal-preview-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 0.75rem;
+            width: 100%;
+        }
+
+        .modal-actions button {
+            flex: 1;
+        }
+
+        .countdown-overlay {
+            position: absolute;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.85);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+
+        .countdown-number {
+            font-size: 7rem;
+            font-weight: 800;
+            color: var(--cream-accent);
+            line-height: 1;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(247, 243, 235, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(247, 243, 235, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(247, 243, 235, 0); }
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Area -->
+    <header>
+        <div class="header-title-group">
+            <div class="header-pulse-dot"></div>
+            <h1 class="header-title">INVISIBILITY ENGINE SUITE</h1>
+        </div>
+        <div class="header-controls">
+            <span id="status-badge" class="badge">CAM OFF</span>
+            <button id="btn-toggle-cam" class="btn-primary" onclick="App.toggleCamera()">Start WebCam</button>
+        </div>
+    </header>
+
+    <!-- Workspace -->
+    <main class="workspace">
+        
+        <!-- Left: Canvas Viewport -->
+        <section class="viewport-section">
+            <div id="drop-zone" class="canvas-container">
+                <video id="webcam" playsinline></video>
+                <canvas id="output_canvas"></canvas>
+
+                <!-- Countdown Overlay -->
+                <div id="countdown-overlay" class="countdown-overlay hidden">
+                    <span id="countdown-text" class="countdown-number">3</span>
+                    <p style="color: var(--text-secondary); margin-top: 0.5rem;">Minggir sebentar dari kamera...</p>
+                </div>
+
+                <!-- Live Badges -->
+                <div class="overlay-status-container">
+                    <div class="overlay-badge">
+                        <span id="mode-dot" class="status-dot"></span>
+                        <span id="mode-text" style="font-weight: 600;">VISIBLE</span>
+                    </div>
+                    <div class="overlay-badge">
+                        <span>Engine:</span>
+                        <span id="engine-text" style="color: var(--cream-accent); font-weight: 600;">Bounding Box</span>
+                    </div>
+                </div>
+
+                <div class="overlay-gesture-container">
+                    <div class="overlay-badge">
+                        <span>Gesture:</span>
+                        <span id="detected-gesture" style="color: var(--cream-accent); font-weight: 700;">None</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Toolbar -->
+            <div class="viewport-toolbar">
+                <button class="btn-secondary" onclick="App.startReadyFlow()">
+                    <span>📷</span> I'm Ready (Auto 3s)
+                </button>
+                <label class="btn-secondary" style="cursor: pointer;">
+                    <span>📁</span> Upload Foto Background
+                    <input type="file" id="bg-file-input" accept="image/*" style="display: none;" onchange="App.uploadBackground(event)">
+                </label>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">atau drag & drop foto ke canvas</span>
+            </div>
+        </section>
+
+        <!-- Right: Controls & Adjustments -->
+        <aside class="control-panel">
+            
+            <!-- Section: Invisibility Engine Mode -->
+            <div class="panel-section">
+                <div class="panel-section-title">Invisibility Mode</div>
+                <div class="mode-grid">
+                    <button id="btn-mode-box" class="btn-mode active" onclick="App.setInvisMode('box')">
+                        Bounding Box (Kotak)
+                    </button>
+                    <button id="btn-mode-seg" class="btn-mode" onclick="App.setInvisMode('seg')">
+                        Full Body (Seg Mask)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Section: Bounding Box Adjustments -->
+            <div id="box-settings" class="panel-section">
+                <div class="panel-section-title">Pengaturan Bounding Box</div>
+                
+                <div class="form-group">
+                    <div class="form-label-row">
+                        <span style="color: var(--text-secondary);">Skala Ukuran Box</span>
+                        <span id="scale-val" style="color: var(--cream-accent); font-weight: 600;">2.2x</span>
+                    </div>
+                    <input type="range" id="box-scale-slider" class="slider-custom" min="1.0" max="4.5" step="0.1" value="2.2" oninput="App.updateBoxScale(this.value)">
+                    <span style="font-size: 0.68rem; color: var(--text-muted);">Makin besar nilai, makin luas area kotak menutupi tubuh & baju.</span>
+                </div>
+
+                <div class="checkbox-row">
+                    <div>
+                        <div style="font-size: 0.8rem; font-weight: 500;">Lock Ukuran Fixed</div>
+                        <div style="font-size: 0.68rem; color: var(--text-muted);">Ukuran kotak dikunci, posisi tetap ikuti badan</div>
+                    </div>
+                    <input type="checkbox" id="lock-size-toggle" class="checkbox-custom" onchange="App.toggleLockSize(this.checked)">
+                </div>
+
+                <div id="lock-dimensions" class="input-grid disabled-group">
+                    <div class="form-group">
+                        <label style="font-size: 0.68rem; color: var(--text-muted);">Lebar Box (px)</label>
+                        <input type="number" id="fixed-w" class="input-custom" value="550" onchange="App.updateFixedDim()">
+                    </div>
+                    <div class="form-group">
+                        <label style="font-size: 0.68rem; color: var(--text-muted);">Tinggi Box (px)</label>
+                        <input type="number" id="fixed-h" class="input-custom" value="700" onchange="App.updateFixedDim()">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section: Gesture Triggers -->
+            <div class="panel-section">
+                <div class="panel-section-title">Custom Gesture Mapping</div>
+                
+                <div class="form-group">
+                    <div class="form-label-row" style="margin-bottom: 0.2rem;">
+                        <span style="color: var(--text-secondary);">Menghilang (Hide)</span>
+                    </div>
+                    <select id="gesture-hide" class="select-custom">
+                        <option value="2_fingers">✌️ Jari 2 (Peace)</option>
+                        <option value="open_palm">🤚 Telapak Tangan</option>
+                        <option value="fist">✊ Kepalan Tangan</option>
+                        <option value="rock">🤘 Metal / Rock</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <div class="form-label-row" style="margin-bottom: 0.2rem;">
+                        <span style="color: var(--text-secondary);">Muncul (Show)</span>
+                    </div>
+                    <select id="gesture-show" class="select-custom">
+                        <option value="open_palm">🤚 Telapak Tangan</option>
+                        <option value="2_fingers">✌️ Jari 2 (Peace)</option>
+                        <option value="fist">✊ Kepalan Tangan</option>
+                    </select>
+                </div>
+            </div>
+
+        </aside>
+    </main>
+
+    <!-- Background Snapshot Confirmation Modal -->
+    <div id="confirm-modal" class="modal-overlay hidden">
+        <div class="modal-card">
+            <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--cream-accent);">Is it good?</h3>
+            <p style="font-size: 0.75rem; color: var(--text-secondary);">Apakah foto background ruangan sudah bersih tanpa ada orang?</p>
+            
+            <div class="modal-preview-box">
+                <img id="bg-preview-img" alt="Background Snapshot Preview">
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="App.retakeBg()" style="justify-content: center;">Retake (Ulang)</button>
+                <button class="btn-primary" onclick="App.keepBg()">Keep (Gunakan)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Core Script Engine -->
+    <script>
+        /**
+         * Core Engine Controller Module
+         */
+        const App = (() => {
+            // DOM Binding Cache
+            const DOM = {
+                webcam: document.getElementById('webcam'),
+                canvas: document.getElementById('output_canvas'),
+                statusBadge: document.getElementById('status-badge'),
+                btnToggleCam: document.getElementById('btn-toggle-cam'),
+                modeDot: document.getElementById('mode-dot'),
+                modeText: document.getElementById('mode-text'),
+                engineText: document.getElementById('engine-text'),
+                detectedGesture: document.getElementById('detected-gesture'),
+                dropZone: document.getElementById('drop-zone'),
+                countdownOverlay: document.getElementById('countdown-overlay'),
+                countdownText: document.getElementById('countdown-text'),
+                confirmModal: document.getElementById('confirm-modal'),
+                bgPreviewImg: document.getElementById('bg-preview-img'),
+                btnModeBox: document.getElementById('btn-mode-box'),
+                btnModeSeg: document.getElementById('btn-mode-seg'),
+                scaleVal: document.getElementById('scale-val'),
+                lockDimensions: document.getElementById('lock-dimensions'),
+                gestureHide: document.getElementById('gesture-hide'),
+                gestureShow: document.getElementById('gesture-show'),
+                fixedW: document.getElementById('fixed-w'),
+                fixedH: document.getElementById('fixed-h')
+            };
+
+            const ctx = DOM.canvas.getContext('2d');
+
+            // Internal State Variables
+            let cameraPipeline = null;
+            let isCamActive = false;
+            let isInvisible = false;
+            let invisEngineMode = 'box'; // 'box' or 'seg'
+
+            // Background Buffers
+            let bgCanvas = document.createElement('canvas');
+            let bgCtx = bgCanvas.getContext('2d');
+            let tempSegCanvas = document.createElement('canvas');
+            let tempSegCtx = tempSegCanvas.getContext('2d');
+            let hasBackground = false;
+
+            // Box Expansion & Lock Parameters
+            let boxScale = 2.2;
+            let isSizeLocked = false;
+            let fixedWidth = 550;
+            let fixedHeight = 700;
+
+            // Smoothed Motion Vector Box
+            let smoothBox = { x: 0, y: 0, w: 0, h: 0 };
+
+            // MediaPipe Cache
+            let latestPoseLandmarks = null;
+            let latestHandLandmarks = null;
+            let latestSegmentationMask = null;
+
+            /**
+             * Initialize MediaPipe AI Models
+             */
+            const handsModel = new Hands({
+                locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+            });
+            handsModel.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.7 });
+            handsModel.onResults((results) => {
+                latestHandLandmarks = results.multiHandLandmarks ? results.multiHandLandmarks[0] : null;
+                processGestureLogic();
+            });
+
+            const poseModel = new Pose({
+                locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
+            });
+            poseModel.setOptions({ modelComplexity: 1, smoothLandmarks: true });
+            poseModel.onResults((results) => {
+                latestPoseLandmarks = results.poseLandmarks;
+                checkAutoEmptyRoomCapture();
+            });
+
+            const segmentationModel = new SelfieSegmentation({
+                locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`
+            });
+            segmentationModel.setOptions({ modelSelection: 1 });
+            segmentationModel.onResults((results) => {
+                latestSegmentationMask = results.segmentationMask;
+            });
+
+            /**
+             * Toggle Camera Feed
+             */
+            function toggleCamera() {
+                if (isCamActive) {
+                    if (cameraPipeline) cameraPipeline.stop();
+                    isCamActive = false;
+                    DOM.statusBadge.innerText = "CAM OFF";
+                    DOM.statusBadge.className = "badge";
+                    DOM.btnToggleCam.innerText = "Start WebCam";
+                } else {
+                    initCamera();
+                    isCamActive = true;
+                    DOM.statusBadge.innerText = "CAM LIVE";
+                    DOM.statusBadge.className = "badge badge-live";
+                    DOM.btnToggleCam.innerText = "Stop WebCam";
+                }
+            }
+
+            function initCamera() {
+                cameraPipeline = new Camera(DOM.webcam, {
+                    onFrame: async () => {
+                        await segmentationModel.send({ image: DOM.webcam });
+                        await poseModel.send({ image: DOM.webcam });
+                        await handsModel.send({ image: DOM.webcam });
+                        renderMainCanvas();
+                    },
+                    width: 1280,
+                    height: 720
+                });
+                cameraPipeline.start();
+            }
+
+            /**
+             * Main Canvas Rendering Loop
+             */
+            function renderMainCanvas() {
+                if (DOM.canvas.width !== DOM.webcam.videoWidth) {
+                    const width = DOM.webcam.videoWidth || 1280;
+                    const height = DOM.webcam.videoHeight || 720;
+                    DOM.canvas.width = width;
+                    DOM.canvas.height = height;
+                    bgCanvas.width = width;
+                    bgCanvas.height = height;
+                    tempSegCanvas.width = width;
+                    tempSegCanvas.height = height;
+                }
+
+                const w = DOM.canvas.width;
+                const h = DOM.canvas.height;
+
+                ctx.save();
+                ctx.clearRect(0, 0, w, h);
+                ctx.drawImage(DOM.webcam, 0, 0, w, h);
+
+                if (isInvisible && hasBackground) {
+                    if (invisEngineMode === 'box') {
+                        renderBoundingBoxInvisibility(w, h);
+                    } else if (invisEngineMode === 'seg' && latestSegmentationMask) {
+                        renderSegmentationInvisibility(w, h);
+                    }
+                }
+
+                ctx.restore();
+            }
+
+            /**
+             * Algoritma Bounding Box Raksasa Multi-Point
+             */
+            function renderBoundingBoxInvisibility(w, h) {
+                let targetX = w / 4, targetY = h / 6, targetW = w / 2, targetH = h * 0.8;
+
+                if (latestPoseLandmarks) {
+                    let minX = 1.0, maxX = 0.0, minY = 1.0, maxY = 0.0;
+                    
+                    // Lacak seluruh sendi: Kepala, telinga, bahu, siku, pergelangan, pinggang
+                    const keyIndices = [0, 2, 5, 7, 8, 11, 12, 13, 14, 15, 16, 23, 24];
+                    keyIndices.forEach(idx => {
+                        const lm = latestPoseLandmarks[idx];
+                        if (lm && lm.visibility > 0.3) {
+                            if (lm.x < minX) minX = lm.x;
+                            if (lm.x > maxX) maxX = lm.x;
+                            if (lm.y < minY) minY = lm.y;
+                            if (lm.y > maxY) maxY = lm.y;
+                        }
+                    });
+
+                    if (minX < maxX && minY < maxY) {
+                        let boxW = (maxX - minX) * w;
+                        let boxH = (maxY - minY) * h;
+                        let centerX = (minX + (maxX - minX) / 2) * w;
+                        let centerY = (minY + (maxY - minY) / 2) * h;
+
+                        if (isSizeLocked) {
+                            targetW = fixedWidth;
+                            targetH = fixedHeight;
+                        } else {
+                            targetW = boxW * boxScale;
+                            targetH = boxH * boxScale;
+                        }
+
+                        targetX = centerX - (targetW / 2);
+                        targetY = centerY - (targetH / 2);
+                    }
+                }
+
+                // Perhalus Pergerakan Box (Smoothing)
+                smoothBox.x += (targetX - smoothBox.x) * 0.25;
+                smoothBox.y += (targetY - smoothBox.y) * 0.25;
+                smoothBox.w += (targetW - smoothBox.w) * 0.25;
+                smoothBox.h += (targetH - smoothBox.h) * 0.25;
+
+                // Timpa area kotak dengan foto background
+                ctx.save();
+                ctx.beginPath();
+                ctx.rect(smoothBox.x, smoothBox.y, smoothBox.w, smoothBox.h);
+                ctx.clip();
+                ctx.drawImage(bgCanvas, 0, 0, w, h);
+                ctx.restore();
+            }
+
+            /**
+             * Algoritma Full Body Segmentation Mask
+             */
+            function renderSegmentationInvisibility(w, h) {
+                tempSegCtx.clearRect(0, 0, w, h);
+                tempSegCtx.drawImage(latestSegmentationMask, 0, 0, w, h);
+
+                ctx.save();
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.drawImage(tempSegCanvas, 0, 0, w, h);
+                ctx.globalCompositeOperation = 'destination-over';
+                ctx.drawImage(bgCanvas, 0, 0, w, h);
+                ctx.restore();
+            }
+
+            /**
+             * Gesture Engine Tracker
+             */
+            function processGestureLogic() {
+                if (!latestHandLandmarks) {
+                    DOM.detectedGesture.innerText = "None";
+                    return;
+                }
+
+                const lm = latestHandLandmarks;
+                const indexUp = lm[8].y < lm[6].y;
+                const middleUp = lm[12].y < lm[10].y;
+                const ringUp = lm[16].y < lm[14].y;
+                const pinkyUp = lm[20].y < lm[18].y;
+
+                let gestureFound = "unknown";
+
+                if (indexUp && middleUp && !ringUp && !pinkyUp) {
+                    gestureFound = "2_fingers";
+                    DOM.detectedGesture.innerText = "✌️ 2 Jari";
+                } else if (indexUp && middleUp && ringUp && pinkyUp) {
+                    gestureFound = "open_palm";
+                    DOM.detectedGesture.innerText = "🤚 Telapak Tangan";
+                } else if (!indexUp && !middleUp && !ringUp && !pinkyUp) {
+                    gestureFound = "fist";
+                    DOM.detectedGesture.innerText = "✊ Kepal";
+                } else if (indexUp && !middleUp && !ringUp && pinkyUp) {
+                    gestureFound = "rock";
+                    DOM.detectedGesture.innerText = "🤘 Metal";
+                } else {
+                    DOM.detectedGesture.innerText = "Detecting...";
+                }
+
+                const hideTrigger = DOM.gestureHide.value;
+                const showTrigger = DOM.gestureShow.value;
+
+                if (gestureFound === hideTrigger && !isInvisible) {
+                    setInvisibilityState(true);
+                } else if (gestureFound === showTrigger && isInvisible) {
+                    setInvisibilityState(false);
+                }
+            }
+
+            function setInvisibilityState(state) {
+                isInvisible = state;
+                if (isInvisible) {
+                    DOM.modeText.innerText = "INVISIBLE";
+                    DOM.modeDot.className = "status-dot invis";
+                } else {
+                    DOM.modeText.innerText = "VISIBLE";
+                    DOM.modeDot.className = "status-dot";
+                }
+            }
+
+            /**
+             * Background Capture & Interactive Ready Flow
+             */
+            function startReadyFlow() {
+                DOM.countdownOverlay.classList.remove('hidden');
+                let count = 3;
+                DOM.countdownText.innerText = count;
+
+                const timer = setInterval(() => {
+                    count--;
+                    if (count > 0) {
+                        DOM.countdownText.innerText = count;
+                    } else {
+                        clearInterval(timer);
+                        DOM.countdownOverlay.classList.add('hidden');
+                        captureBgSnapshot();
+                    }
+                }, 1000);
+            }
+
+            function captureBgSnapshot() {
+                bgCtx.drawImage(DOM.webcam, 0, 0, bgCanvas.width, bgCanvas.height);
+                DOM.bgPreviewImg.src = bgCanvas.toDataURL('image/png');
+                DOM.confirmModal.classList.remove('hidden');
+            }
+
+            function keepBg() {
+                hasBackground = true;
+                DOM.confirmModal.classList.add('hidden');
+            }
+
+            function retakeBg() {
+                DOM.confirmModal.classList.add('hidden');
+                startReadyFlow();
+            }
+
+            function checkAutoEmptyRoomCapture() {
+                if (!hasBackground && isCamActive && !latestPoseLandmarks) {
+                    bgCtx.drawImage(DOM.webcam, 0, 0, bgCanvas.width, bgCanvas.height);
+                    hasBackground = true;
+                }
+            }
+
+            function uploadBackground(event) {
+                const file = event.target ? event.target.files[0] : event;
+                if (file && file.type.startsWith('image/')) {
+                    const img = new Image();
+                    img.onload = function() {
+                        bgCtx.drawImage(img, 0, 0, bgCanvas.width, bgCanvas.height);
+                        hasBackground = true;
+                    };
+                    img.src = URL.createObjectURL(file);
+                }
+            }
+
+            /**
+             * Drag & Drop Handler Setup
+             */
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(evtName => {
+                DOM.dropZone.addEventListener(evtName, (e) => { e.preventDefault(); e.stopPropagation(); }, false);
+            });
+            ['dragenter', 'dragover'].forEach(evtName => {
+                DOM.dropZone.addEventListener(evtName, () => DOM.dropZone.classList.add('drag-over'), false);
+            });
+            ['dragleave', 'drop'].forEach(evtName => {
+                DOM.dropZone.addEventListener(evtName, () => DOM.dropZone.classList.remove('drag-over'), false);
+            });
+            DOM.dropZone.addEventListener('drop', (e) => {
+                const files = e.dataTransfer.files;
+                if (files.length > 0) uploadBackground(files[0]);
+            }, false);
+
+            /**
+             * Control Panel Action Listeners
+             */
+            function setInvisMode(mode) {
+                invisEngineMode = mode;
+                if (mode === 'box') {
+                    DOM.engineText.innerText = "Bounding Box";
+                    DOM.btnModeBox.className = "btn-mode active";
+                    DOM.btnModeSeg.className = "btn-mode";
+                } else {
+                    DOM.engineText.innerText = "Full Body Seg";
+                    DOM.btnModeSeg.className = "btn-mode active";
+                    DOM.btnModeBox.className = "btn-mode";
+                }
+            }
+
+            function updateBoxScale(val) {
+                boxScale = parseFloat(val);
+                DOM.scaleVal.innerText = `${boxScale.toFixed(1)}x`;
+            }
+
+            function toggleLockSize(checked) {
+                isSizeLocked = checked;
+                if (checked) {
+                    DOM.lockDimensions.classList.remove('disabled-group');
+                } else {
+                    DOM.lockDimensions.classList.add('disabled-group');
+                }
+            }
+
+            function updateFixedDim() {
+                fixedWidth = parseInt(DOM.fixedW.value) || 550;
+                fixedHeight = parseInt(DOM.fixedH.value) || 700;
+            }
+
+            return {
+                toggleCamera,
+                setInvisMode,
+                updateBoxScale,
+                toggleLockSize,
+                updateFixedDim,
+                startReadyFlow,
+                keepBg,
+                retakeBg,
+                uploadBackground
+            };
+        })();
+    </script>
+</body>
+</html>
