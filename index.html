@@ -13,9 +13,10 @@
 
     <style>
         /* ==========================================================================
-           1. RESET & SYSTEM VARIABLES (Monochrome & Cream Palette)
+           1. THEME VARIABLES (Dark, Light, Warm Eye Saver / Clay Cream)
            ========================================================================== */
         :root {
+            /* Default: Dark Theme */
             --bg-main: #121212;
             --bg-panel: #1A1A1A;
             --bg-card: #242424;
@@ -30,6 +31,36 @@
             --cream-dark: #121212;
             --status-active: #4CAF50;
             --status-invis: #E53935;
+        }
+
+        body.theme-light {
+            --bg-main: #F4F4F5;
+            --bg-panel: #FFFFFF;
+            --bg-card: #E4E4E7;
+            --bg-hover: #D4D4D8;
+            --border-color: #E4E4E7;
+            --border-light: #D4D4D8;
+            --text-primary: #18181B;
+            --text-secondary: #52525B;
+            --text-muted: #71717A;
+            --cream-accent: #18181B;
+            --cream-hover: #000000;
+            --cream-dark: #FFFFFF;
+        }
+
+        body.theme-eyesaver {
+            --bg-main: #F5EFE6;
+            --bg-panel: #EAE3D2;
+            --bg-card: #DFD7BF;
+            --bg-hover: #D0C7B0;
+            --border-color: #D0C7B0;
+            --border-light: #C5BBA4;
+            --text-primary: #3F3B3B;
+            --text-secondary: #605B56;
+            --text-muted: #807A75;
+            --cream-accent: #3F3B3B;
+            --cream-hover: #1A1818;
+            --cream-dark: #F5EFE6;
         }
 
         * {
@@ -47,20 +78,20 @@
             display: flex;
             flex-direction: column;
             overflow-x: hidden;
+            transition: background-color 0.3s, color 0.3s;
         }
 
         /* ==========================================================================
-           2. HEADER LAYOUT
+           2. HEADER & TOOLBAR LAYOUT
            ========================================================================== */
         header {
             background-color: var(--bg-panel);
             border-bottom: 1px solid var(--border-color);
-            padding: 1rem 1.5rem;
+            padding: 0.8rem 1.5rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
             height: 64px;
-            transition: opacity 0.3s;
         }
 
         .header-title-group {
@@ -74,7 +105,7 @@
             height: 10px;
             border-radius: 50%;
             background-color: var(--cream-accent);
-            box-shadow: 0 0 8px rgba(247, 243, 235, 0.6);
+            box-shadow: 0 0 8px var(--cream-accent);
             animation: pulse 2s infinite;
         }
 
@@ -88,7 +119,7 @@
         .header-controls {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 0.75rem;
         }
 
         .badge {
@@ -102,9 +133,9 @@
         }
 
         .badge-live {
-            background-color: rgba(76, 175, 80, 0.1);
+            background-color: rgba(76, 175, 80, 0.15);
             color: #81C784;
-            border-color: rgba(76, 175, 80, 0.3);
+            border-color: rgba(76, 175, 80, 0.4);
         }
 
         .btn-primary {
@@ -113,35 +144,50 @@
             border: none;
             padding: 0.5rem 1.25rem;
             border-radius: 4px;
-            font-size: 0.875rem;
+            font-size: 0.85rem;
             font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.2s, transform 0.1s;
+            transition: all 0.2s;
         }
 
         .btn-primary:hover {
             background-color: var(--cream-hover);
+            transform: translateY(-1px);
         }
 
-        .btn-primary:active {
-            transform: scale(0.98);
+        .btn-secondary {
+            background-color: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-light);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--bg-hover);
+            border-color: var(--cream-accent);
         }
 
         /* ==========================================================================
-           3. MAIN CONTAINER LAYOUT
+           3. MAIN CONTAINER & VIEWPORT
            ========================================================================== */
         .workspace {
             flex: 1;
             display: flex;
             gap: 1.5rem;
-            padding: 1.5rem;
+            padding: 1.25rem;
             max-width: 1800px;
             width: 100%;
             margin: 0 auto;
-            transition: all 0.3s ease;
         }
 
-        /* Left Column - Video Canvas Viewport */
         .viewport-section {
             flex: 1;
             background-color: var(--bg-panel);
@@ -153,7 +199,6 @@
             align-items: center;
             justify-content: center;
             position: relative;
-            min-height: 520px;
         }
 
         .canvas-container {
@@ -165,7 +210,7 @@
             border-radius: 8px;
             overflow: hidden;
             border: 2px dashed var(--border-color);
-            transition: border-color 0.2s, background-color 0.2s;
+            transition: border-color 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -173,20 +218,12 @@
 
         .canvas-container.drag-over {
             border-color: var(--cream-accent);
-            background-color: rgba(247, 243, 235, 0.03);
+            background-color: rgba(247, 243, 235, 0.05);
         }
 
-        #webcam {
-            display: none;
-        }
+        #webcam { display: none; }
+        #output_canvas { width: 100%; height: 100%; object-fit: contain; }
 
-        #output_canvas {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
-        /* Viewport Badges Overlay */
         .overlay-status-container {
             position: absolute;
             top: 1rem;
@@ -196,10 +233,18 @@
             z-index: 10;
         }
 
+        .overlay-gesture-container {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            z-index: 10;
+        }
+
         .overlay-badge {
             background-color: rgba(0, 0, 0, 0.75);
             backdrop-filter: blur(4px);
-            border: 1px solid var(--border-light);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #FFFFFF;
             padding: 0.35rem 0.75rem;
             border-radius: 6px;
             font-size: 0.75rem;
@@ -220,14 +265,6 @@
             animation: blink 1s infinite;
         }
 
-        .overlay-gesture-container {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            z-index: 10;
-        }
-
-        /* Toolbar Below Canvas */
         .viewport-toolbar {
             display: flex;
             flex-wrap: wrap;
@@ -238,83 +275,64 @@
             width: 100%;
         }
 
-        .btn-secondary {
-            background-color: var(--bg-card);
-            color: var(--text-primary);
-            border: 1px solid var(--border-light);
-            padding: 0.6rem 1.25rem;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: background-color 0.2s, border-color 0.2s;
-        }
-
-        .btn-secondary:hover {
-            background-color: var(--bg-hover);
-            border-color: var(--cream-accent);
-        }
-
-        /* Right Column - Controls Panel */
+        /* ==========================================================================
+           4. SIDEBAR CONTROL PANEL & TABS
+           ========================================================================== */
         .control-panel {
             width: 380px;
             background-color: var(--bg-panel);
             border: 1px solid var(--border-color);
             border-radius: 12px;
-            padding: 1.5rem;
             display: flex;
             flex-direction: column;
-            gap: 1.5rem;
-            overflow-y: auto;
-            max-height: calc(100vh - 112px);
+            overflow: hidden;
+            max-height: calc(100vh - 110px);
         }
 
-        .panel-section {
+        .panel-header {
+            padding: 0.85rem 1.25rem;
+            background-color: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
             display: flex;
-            flex-direction: column;
-            gap: 0.85rem;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .panel-section-title {
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: var(--text-secondary);
-            padding-bottom: 0.25rem;
+        .tab-nav {
+            display: flex;
+            background-color: var(--bg-main);
             border-bottom: 1px solid var(--border-color);
         }
 
-        /* Mode Switcher Buttons */
-        .mode-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.5rem;
-        }
-
-        .btn-mode {
-            padding: 0.75rem 0.5rem;
-            font-size: 0.75rem;
-            font-weight: 600;
-            border-radius: 6px;
-            border: 1px solid var(--border-light);
-            background-color: var(--bg-card);
+        .tab-btn {
+            flex: 1;
+            padding: 0.65rem 0.25rem;
+            font-size: 0.72rem;
+            font-weight: 700;
+            border: none;
+            background: none;
             color: var(--text-secondary);
             cursor: pointer;
+            border-bottom: 2px solid transparent;
             text-align: center;
             transition: all 0.2s;
         }
 
-        .btn-mode.active {
-            background-color: var(--cream-accent);
-            color: var(--cream-dark);
-            border-color: var(--cream-accent);
+        .tab-btn.active {
+            color: var(--text-primary);
+            border-bottom-color: var(--cream-accent);
+            background-color: var(--bg-panel);
         }
 
-        /* Form Controls */
+        .tab-content {
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.1rem;
+            overflow-y: auto;
+            flex: 1;
+        }
+
         .form-group {
             display: flex;
             flex-direction: column;
@@ -342,7 +360,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0.5rem 0;
+            padding: 0.25rem 0;
         }
 
         .checkbox-custom {
@@ -352,51 +370,101 @@
             cursor: pointer;
         }
 
+        .select-custom, .input-custom {
+            width: 100%;
+            background-color: var(--bg-main);
+            border: 1px solid var(--border-light);
+            color: var(--text-primary);
+            padding: 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            outline: none;
+        }
+
+        .select-custom:focus, .input-custom:focus {
+            border-color: var(--cream-accent);
+        }
+
         .input-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 0.5rem;
         }
 
-        .input-custom {
-            width: 100%;
-            background-color: var(--bg-main);
-            border: 1px solid var(--border-light);
-            color: var(--text-primary);
-            padding: 0.5rem;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            outline: none;
-        }
-
-        .input-custom:focus {
-            border-color: var(--cream-accent);
-        }
-
-        .select-custom {
-            width: 100%;
-            background-color: var(--bg-main);
-            border: 1px solid var(--border-light);
-            color: var(--text-primary);
-            padding: 0.5rem;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            outline: none;
+        .color-picker-custom {
+            height: 34px;
+            padding: 2px;
             cursor: pointer;
         }
 
-        .select-custom:focus {
-            border-color: var(--cream-accent);
+        /* ==========================================================================
+           5. FOOTER & 3D METALLIC BRANDING
+           ========================================================================== */
+        .suite-footer {
+            margin-top: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.35rem;
+            text-align: center;
+            padding-bottom: 0.5rem;
         }
 
-        /* Disabled State for Forms */
-        .disabled-group {
-            opacity: 0.35;
-            pointer-events: none;
+        .footer-line-1 {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--cream-accent);
+            letter-spacing: 0.04em;
+        }
+
+        .footer-line-2 {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* 3D Metallic Link Button */
+        .metallic-link-btn {
+            margin-top: 0.25rem;
+            background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 45%, #444444 50%, #111111 55%, #2a2a2a 100%);
+            border: 1px solid #555555;
+            box-shadow: 
+                inset 0 1px 0 rgba(255, 255, 255, 0.25),
+                0 4px 10px rgba(0, 0, 0, 0.6),
+                0 0 12px rgba(247, 243, 235, 0.1);
+            color: #F7F3EB !important;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+            border-radius: 6px;
+            padding: 0.45rem 1.1rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .metallic-link-btn:hover {
+            background: linear-gradient(135deg, #3a3a3a 0%, #252525 45%, #555555 50%, #1e1e1e 55%, #333333 100%);
+            border-color: #888888;
+            box-shadow: 
+                inset 0 1px 0 rgba(255, 255, 255, 0.4),
+                0 6px 14px rgba(0, 0, 0, 0.8),
+                0 0 16px rgba(247, 243, 235, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .metallic-link-btn:active {
+            transform: translateY(1px);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.8);
         }
 
         /* ==========================================================================
-           4. MODAL OVERLAYS & CLEAN WEB FULLSCREEN MODE
+           6. MODALS & FULL CLEAN WEB MODE
            ========================================================================== */
         .modal-overlay {
             position: fixed;
@@ -421,7 +489,7 @@
             align-items: center;
             text-align: center;
             gap: 1rem;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
         }
 
         .modal-preview-box {
@@ -467,16 +535,15 @@
             line-height: 1;
         }
 
-        .hidden {
-            display: none !important;
-        }
+        .hidden { display: none !important; }
 
-        /* Full Clean Mode Classes */
-        body.full-clean-mode header {
-            display: none !important;
-        }
-
-        body.full-clean-mode .control-panel {
+        /* Full Clean Mode Styles */
+        body.full-clean-mode header,
+        body.full-clean-mode .control-panel,
+        body.full-clean-mode .overlay-status-container,
+        body.full-clean-mode .overlay-gesture-container,
+        body.full-clean-mode .viewport-toolbar,
+        body.full-clean-mode .suite-footer {
             display: none !important;
         }
 
@@ -494,8 +561,6 @@
             background: #000000 !important;
             width: 100vw !important;
             height: 100vh !important;
-            max-width: 100vw !important;
-            max-height: 100vh !important;
         }
 
         body.full-clean-mode .canvas-container {
@@ -505,12 +570,6 @@
             border: none !important;
             border-radius: 0 !important;
             aspect-ratio: auto !important;
-        }
-
-        body.full-clean-mode .overlay-status-container,
-        body.full-clean-mode .overlay-gesture-container,
-        body.full-clean-mode .viewport-toolbar {
-            display: none !important;
         }
 
         /* Animations */
@@ -526,24 +585,22 @@
         }
     </style>
 </head>
-<body>
+<body class="theme-dark">
 
-    <!-- Header Area -->
+    <!-- Header Navigation -->
     <header>
         <div class="header-title-group">
             <div class="header-pulse-dot"></div>
-            <h1 class="header-title">INVISIBILITY ENGINE SUITE</h1>
+            <h1 class="header-title">GESTURE INVISIBILITY SUITE</h1>
         </div>
         <div class="header-controls">
             <span id="status-badge" class="badge">CAM OFF</span>
-            <button class="btn-secondary" onclick="App.toggleFullCleanMode()" title="Mode Tampilan Bersih (Satu Web Full Tanpa Teks/Indikator)">
-                📺 Clean Web Mode
-            </button>
+            <button class="btn-secondary" onclick="App.toggleFullCleanMode()">📺 Clean Web Mode (F)</button>
             <button id="btn-toggle-cam" class="btn-primary" onclick="App.toggleCamera()">Start WebCam</button>
         </div>
     </header>
 
-    <!-- Workspace -->
+    <!-- Main Workspace -->
     <main class="workspace">
         
         <!-- Left: Canvas Viewport -->
@@ -565,8 +622,8 @@
                         <span id="mode-text" style="font-weight: 600;">VISIBLE</span>
                     </div>
                     <div class="overlay-badge">
-                        <span>Engine:</span>
-                        <span id="engine-text" style="color: var(--cream-accent); font-weight: 600;">Bounding Box</span>
+                        <span>FPS:</span>
+                        <span id="live-fps-text" style="color: #81C784; font-weight: 700;">--</span>
                     </div>
                 </div>
 
@@ -578,155 +635,199 @@
                 </div>
             </div>
 
-            <!-- Toolbar -->
+            <!-- Toolbar below canvas -->
             <div class="viewport-toolbar">
                 <button class="btn-secondary" onclick="App.startReadyFlow()">
-                    <span>📷</span> I'm Ready (Auto 3s)
+                    <span>📷</span> Capture BG1 (3s)
                 </button>
                 <label class="btn-secondary" style="cursor: pointer;">
-                    <span>📁</span> Upload Foto Background
-                    <input type="file" id="bg-file-input" accept="image/*" style="display: none;" onchange="App.uploadBackground(event)">
+                    <span>📁</span> Upload BG Custom
+                    <input type="file" id="bg-file-input" accept="image/*" style="display: none;" onchange="App.uploadCustomBackground(event)">
                 </label>
                 <button class="btn-secondary" onclick="App.toggleFullCleanMode()">
                     <span>📺</span> Clean Mode (F/Esc)
                 </button>
                 <span style="font-size: 0.75rem; color: var(--text-muted);">Tekan 1-5 untuk Zoom 1x-5x</span>
             </div>
+
+            <!-- Bottom Center Metallic 3D Branding Footer -->
+            <footer class="suite-footer">
+                <div class="footer-line-1">Made with love</div>
+                <div class="footer-line-2">Support Demo Apps</div>
+                <a href="https://ibtgem-with.ai.studio" target="_blank" class="metallic-link-btn" title="Open Official Studio Link">
+                    <span>⚡ https://ibtgem-with.ai.studio</span>
+                </a>
+            </footer>
         </section>
 
-        <!-- Right: Controls & Adjustments -->
+        <!-- Right: Control Panel -->
         <aside class="control-panel">
-            
-            <!-- Section: Invisibility Engine Mode -->
-            <div class="panel-section">
-                <div class="panel-section-title">Invisibility Mode</div>
-                <div class="mode-grid">
-                    <button id="btn-mode-box" class="btn-mode active" onclick="App.setInvisMode('box')">
-                        Bounding Box (Kotak)
-                    </button>
-                    <button id="btn-mode-seg" class="btn-mode" onclick="App.setInvisMode('seg')">
-                        Full Body (Seg Mask)
-                    </button>
-                </div>
+            <div class="panel-header">
+                <span style="font-size: 0.85rem; font-weight: 700;">PENGATURAN SUITE</span>
+                <button onclick="App.toggleMinimizePanel()" class="btn-secondary" style="padding: 0.2rem 0.5rem;">_</button>
             </div>
 
-            <!-- Section: Bounding Box Adjustments -->
-            <div id="box-settings" class="panel-section">
-                <div class="panel-section-title">Pengaturan Bounding Box</div>
-                
-                <div class="form-group">
-                    <div class="form-label-row">
-                        <span style="color: var(--text-secondary);">Skala Ukuran Box</span>
-                        <span id="scale-val" style="color: var(--cream-accent); font-weight: 600;">2.2x</span>
-                    </div>
-                    <input type="range" id="box-scale-slider" class="slider-custom" min="1.0" max="4.5" step="0.1" value="2.2" oninput="App.updateBoxScale(this.value)">
-                    <span style="font-size: 0.68rem; color: var(--text-muted);">Makin besar nilai, makin luas area kotak menutupi tubuh & baju.</span>
-                </div>
+            <div id="panel-body" style="display: flex; flex-direction: column; flex: 1; overflow: hidden;">
+                <nav class="tab-nav">
+                    <button class="tab-btn active" onclick="App.switchTab('tab-engine', this)">⚡ Engine</button>
+                    <button class="tab-btn" onclick="App.switchTab('tab-notes', this)">📝 Notes</button>
+                    <button class="tab-btn" onclick="App.switchTab('tab-gestures', this)">🎯 Gestures</button>
+                    <button class="tab-btn" onclick="App.switchTab('tab-perf', this)">🎨 Themes</button>
+                </nav>
 
-                <div class="form-group">
-                    <div class="form-label-row">
-                        <span style="color: var(--text-secondary);">Zoom Kamera (Face/Body)</span>
-                        <span id="zoom-val" style="color: var(--cream-accent); font-weight: 600;">1.0x</span>
-                    </div>
-                    <input type="range" id="cam-zoom-slider" class="slider-custom" min="1.0" max="5.0" step="0.1" value="1.0" oninput="App.setZoomLevel(this.value)">
-                    <span style="font-size: 0.68rem; color: var(--text-muted);">Gunakan gesture 🤏 (Zoom In) / 👐 (Zoom Out) atau tekan tombol 1,2,3,4,5.</span>
-                </div>
-
-                <div class="checkbox-row">
-                    <div>
-                        <div style="font-size: 0.8rem; font-weight: 500;">Lock Ukuran Fixed</div>
-                        <div style="font-size: 0.68rem; color: var(--text-muted);">Ukuran kotak dikunci, posisi tetap ikuti badan</div>
-                    </div>
-                    <input type="checkbox" id="lock-size-toggle" class="checkbox-custom" onchange="App.toggleLockSize(this.checked)">
-                </div>
-
-                <div id="lock-dimensions" class="input-grid disabled-group">
+                <!-- Tab 1: Engine & Fake BG2 -->
+                <div id="tab-engine" class="tab-content">
                     <div class="form-group">
-                        <label style="font-size: 0.68rem; color: var(--text-muted);">Lebar Box (px)</label>
-                        <input type="number" id="fixed-w" class="input-custom" value="550" onchange="App.updateFixedDim()">
+                        <label class="form-label-row">Mode Invisibility Engine</label>
+                        <select id="engine-mode" class="select-custom" onchange="App.setInvisMode(this.value)">
+                            <option value="box">Bounding Box (Kotak Presisi)</option>
+                            <option value="seg">Full Body Selfie Segmentation</option>
+                        </select>
                     </div>
+
                     <div class="form-group">
-                        <label style="font-size: 0.68rem; color: var(--text-muted);">Tinggi Box (px)</label>
-                        <input type="number" id="fixed-h" class="input-custom" value="700" onchange="App.updateFixedDim()">
+                        <div class="form-label-row">
+                            <span style="color: var(--text-secondary);">Skala Ukuran Box</span>
+                            <span id="scale-val" style="color: var(--cream-accent); font-weight: 600;">2.2x</span>
+                        </div>
+                        <input type="range" class="slider-custom" min="1.0" max="4.5" step="0.1" value="2.2" oninput="App.updateBoxScale(this.value)">
+                    </div>
+
+                    <div class="checkbox-row border-t border-b py-2 my-1" style="border-color: var(--border-color);">
+                        <div>
+                            <div style="font-size: 0.8rem; font-weight: 600;">Enable Fake Background (BG2)</div>
+                            <div style="font-size: 0.68rem; color: var(--text-muted);">Ganti latar fisik ruangan dengan gambar fake</div>
+                        </div>
+                        <input type="checkbox" id="fake-bg-toggle" class="checkbox-custom" onchange="App.toggleFakeBg(this.checked)">
+                    </div>
+
+                    <!-- BG2 Specific Settings -->
+                    <div id="bg2-settings-group" class="form-group disabled-group">
+                        <label class="form-label-row">Preset Background (BG2)</label>
+                        <select id="bg2-preset-select" class="select-custom" onchange="App.selectBg2Preset(this.value)">
+                            <option value="office">🏢 Modern Google Office</option>
+                            <option value="studio">🎙️ Clean Podcast Studio</option>
+                            <option value="library">📚 Cozy Minimalist Library</option>
+                            <option value="custom">📁 Custom Uploaded File</option>
+                        </select>
+
+                        <div class="form-group" style="margin-top: 0.4rem;">
+                            <label style="font-size: 0.68rem; color: var(--text-muted);">Upload Custom File (BG2)</label>
+                            <input type="file" accept="image/*" class="input-custom" onchange="App.uploadCustomBackground(event)">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 2: Custom Text / Meeting Notes Overlay -->
+                <div id="tab-notes" class="tab-content hidden">
+                    <div class="checkbox-row">
+                        <div>
+                            <div style="font-size: 0.8rem; font-weight: 600;">Tampilkan Text / Notes di Overlay</div>
+                            <div style="font-size: 0.68rem; color: var(--text-muted);">Muncul di canvas dan di Clean Web Mode</div>
+                        </div>
+                        <input type="checkbox" id="note-show-toggle" class="checkbox-custom" checked onchange="App.toggleNoteShow(this.checked)">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label-row">Isi Teks / Catatan Meeting</label>
+                        <input type="text" id="note-text-input" class="input-custom" value="LIVE DEMO: GESTURE INVISIBILITY" oninput="App.updateNoteText(this.value)">
+                    </div>
+
+                    <div class="input-grid">
+                        <div class="form-group">
+                            <label style="font-size: 0.68rem; color: var(--text-muted);">Warna Teks</label>
+                            <input type="color" id="note-text-color" class="input-custom color-picker-custom" value="#F7F3EB" onchange="App.updateNoteTextColor(this.value)">
+                        </div>
+                        <div class="form-group">
+                            <label style="font-size: 0.68rem; color: var(--text-muted);">Warna Kotak (BG)</label>
+                            <input type="color" id="note-bg-color" class="input-custom color-picker-custom" value="#121212" onchange="App.updateNoteBgColor(this.value)">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="form-label-row">
+                            <span style="color: var(--text-secondary);">Transparansi Box</span>
+                            <span id="note-opacity-val" style="color: var(--cream-accent); font-weight: 600;">85%</span>
+                        </div>
+                        <input type="range" class="slider-custom" min="0" max="100" value="85" oninput="App.updateNoteOpacity(this.value)">
+                    </div>
+
+                    <div class="form-group">
+                        <div class="form-label-row">
+                            <span style="color: var(--text-secondary);">Ukuran Font (px)</span>
+                            <span id="note-font-val" style="color: var(--cream-accent); font-weight: 600;">18px</span>
+                        </div>
+                        <input type="range" class="slider-custom" min="12" max="36" value="18" oninput="App.updateNoteFontSize(this.value)">
+                    </div>
+                </div>
+
+                <!-- Tab 3: Gestures & Special Effects -->
+                <div id="tab-gestures" class="tab-content hidden">
+                    <div class="form-group">
+                        <label class="form-label-row">Trigger Menghilang (Hide)</label>
+                        <select id="gesture-hide" class="select-custom">
+                            <option value="2_fingers">✌️ Jari 2 (Peace)</option>
+                            <option value="pointing">☝️ Telunjuk</option>
+                            <option value="open_palm">🤚 Telapak Tangan</option>
+                            <option value="fist">✊ Kepalan Tangan</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label-row">Trigger Muncul Kembali (Show)</label>
+                        <select id="gesture-show" class="select-custom">
+                            <option value="open_palm">🤚 Telapak Tangan</option>
+                            <option value="pointing">☝️ Telunjuk</option>
+                            <option value="2_fingers">✌️ Jari 2 (Peace)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 0.4rem; font-size: 0.72rem; color: var(--text-muted); line-height: 1.5;">
+                        <strong>Gestures Spesial Ditambahkan:</strong><br>
+                        🖕 <strong>Middle Finger:</strong> Shut Off Cam (Mati Total)<br>
+                        🫰 <strong>Finger Heart:</strong> Love Rain Effect ❤️<br>
+                        👌 <strong>OK Sign:</strong> Pop-up Badge OK 👌<br>
+                        🤟 <strong>Rock / Disco:</strong> Party Lights Strobe 🪩<br>
+                        👐 / 🤏: <strong>Zoom Out / Zoom In</strong>
+                    </div>
+                </div>
+
+                <!-- Tab 4: Performance & Themes -->
+                <div id="tab-perf" class="tab-content hidden">
+                    <div class="form-group">
+                        <label class="form-label-row">Target FPS Camera Engine</label>
+                        <select id="fps-select" class="select-custom" onchange="App.setFpsTarget(this.value)">
+                            <option value="5">5 FPS (Super Hemat)</option>
+                            <option value="10">10 FPS</option>
+                            <option value="15">15 FPS</option>
+                            <option value="24" selected>24 FPS (Default Cinematic)</option>
+                            <option value="30">30 FPS</option>
+                            <option value="60">60 FPS (Spesifikasi Tinggi)</option>
+                            <option value="120">120 FPS (High Refresh Rate)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label-row">Tema Visual Tampilan</label>
+                        <select class="select-custom" onchange="App.setTheme(this.value)">
+                            <option value="theme-dark">Dark Mode (Default Monokrom)</option>
+                            <option value="theme-light">Light Mode</option>
+                            <option value="theme-eyesaver">Eye Saver / Warm Clay Cream</option>
+                        </select>
                     </div>
                 </div>
             </div>
-
-            <!-- Section: Music & Audio Settings -->
-            <div class="panel-section">
-                <div class="panel-section-title">Music & Disco Party Audio</div>
-                
-                <div class="checkbox-row">
-                    <div>
-                        <div style="font-size: 0.8rem; font-weight: 500;">Aktifkan Sound & Disco</div>
-                        <div style="font-size: 0.68rem; color: var(--text-muted);">Jalankan efek suara/musik saat gesture 🤟 aktif</div>
-                    </div>
-                    <input type="checkbox" id="audio-enable-toggle" class="checkbox-custom" checked onchange="App.toggleAudioEnable(this.checked)">
-                </div>
-
-                <div class="form-group">
-                    <label style="font-size: 0.68rem; color: var(--text-muted);">Custom Audio File (MP3)</label>
-                    <input type="file" id="audio-file-input" accept="audio/*" class="input-custom" onchange="App.uploadAudioFile(event)">
-                </div>
-
-                <div class="form-group">
-                    <label style="font-size: 0.68rem; color: var(--text-muted);">Audio / Track Link (MP3 URL)</label>
-                    <input type="text" id="audio-url-input" class="input-custom" placeholder="https://example.com/music.mp3" onchange="App.setAudioUrl(this.value)">
-                </div>
-            </div>
-
-            <!-- Section: Gesture Triggers -->
-            <div class="panel-section">
-                <div class="panel-section-title">Custom Gesture Mapping</div>
-                
-                <div class="form-group">
-                    <div class="form-label-row" style="margin-bottom: 0.2rem;">
-                        <span style="color: var(--text-secondary);">Menghilang (Hide)</span>
-                    </div>
-                    <select id="gesture-hide" class="select-custom">
-                        <option value="2_fingers">✌️ Jari 2 (Peace)</option>
-                        <option value="pointing">☝️ Telunjuk</option>
-                        <option value="open_palm">🤚 Telapak Tangan</option>
-                        <option value="fist">✊ Kepalan Tangan</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <div class="form-label-row" style="margin-bottom: 0.2rem;">
-                        <span style="color: var(--text-secondary);">Muncul (Show)</span>
-                    </div>
-                    <select id="gesture-show" class="select-custom">
-                        <option value="open_palm">🤚 Telapak Tangan</option>
-                        <option value="pointing">☝️ Telunjuk</option>
-                        <option value="2_fingers">✌️ Jari 2 (Peace)</option>
-                        <option value="fist">✊ Kepalan Tangan</option>
-                    </select>
-                </div>
-
-                <div class="form-group" style="margin-top: 0.5rem; font-size: 0.72rem; color: var(--text-muted); line-height: 1.4;">
-                    <strong>Special Gestures:</strong><br>
-                    🖕 <strong>Middle Finger:</strong> Turn Cam OFF (Shutoff)<br>
-                    🫰 <strong>Finger Heart:</strong> Love Rain Effect ❤️<br>
-                    👌 <strong>OK Sign:</strong> Show OK Badge Overlay 👌<br>
-                    🤟 <strong>Rock / Disco:</strong> Party Lights & Sound 🪩<br>
-                    👐 <strong>Open Hands:</strong> Zoom Out<br>
-                    🤏 <strong>Pinch Hand:</strong> Zoom In
-                </div>
-            </div>
-
         </aside>
     </main>
 
-    <!-- Background Snapshot Confirmation Modal -->
+    <!-- Modal Konfirmasi BG1 Snapshot -->
     <div id="confirm-modal" class="modal-overlay hidden">
         <div class="modal-card">
-            <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--cream-accent);">Is it good?</h3>
+            <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--cream-accent);">Is background good?</h3>
             <p style="font-size: 0.75rem; color: var(--text-secondary);">Apakah foto background ruangan sudah bersih tanpa ada orang?</p>
-            
             <div class="modal-preview-box">
                 <img id="bg-preview-img" alt="Background Snapshot Preview">
             </div>
-
             <div class="modal-actions">
                 <button class="btn-secondary" onclick="App.retakeBg()" style="justify-content: center;">Retake (Ulang)</button>
                 <button class="btn-primary" onclick="App.keepBg()">Keep (Gunakan)</button>
@@ -734,11 +835,20 @@
         </div>
     </div>
 
-    <!-- Application Core Script Engine -->
+    <!-- Modal Alert Hardware Warning (FPS Limit) -->
+    <div id="warning-modal" class="modal-overlay hidden">
+        <div class="modal-card">
+            <h3 style="font-size: 1.1rem; font-weight: 700; color: #E53935;">⚠️ Hardware Warning</h3>
+            <p id="warning-msg" style="font-size: 0.78rem; color: var(--text-secondary); line-height: 1.4;"></p>
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="App.cancelFpsUpgrade()" style="justify-content: center;">Batal (Kembali 24 FPS)</button>
+                <button class="btn-primary" onclick="App.confirmFpsUpgrade()">Lanjutkan Eksekusi</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core JavaScript Application Engine -->
     <script>
-        /**
-         * Core Engine Controller Module
-         */
         const App = (() => {
             // DOM Binding Cache
             const DOM = {
@@ -748,24 +858,27 @@
                 btnToggleCam: document.getElementById('btn-toggle-cam'),
                 modeDot: document.getElementById('mode-dot'),
                 modeText: document.getElementById('mode-text'),
-                engineText: document.getElementById('engine-text'),
+                liveFpsText: document.getElementById('live-fps-text'),
                 detectedGesture: document.getElementById('detected-gesture'),
                 dropZone: document.getElementById('drop-zone'),
                 countdownOverlay: document.getElementById('countdown-overlay'),
                 countdownText: document.getElementById('countdown-text'),
                 confirmModal: document.getElementById('confirm-modal'),
                 bgPreviewImg: document.getElementById('bg-preview-img'),
-                btnModeBox: document.getElementById('btn-mode-box'),
-                btnModeSeg: document.getElementById('btn-mode-seg'),
+                warningModal: document.getElementById('warning-modal'),
+                warningMsg: document.getElementById('warning-msg'),
                 scaleVal: document.getElementById('scale-val'),
-                zoomVal: document.getElementById('zoom-val'),
-                camZoomSlider: document.getElementById('cam-zoom-slider'),
-                lockDimensions: document.getElementById('lock-dimensions'),
+                panelBody: document.getElementById('panel-body'),
                 gestureHide: document.getElementById('gesture-hide'),
                 gestureShow: document.getElementById('gesture-show'),
-                fixedW: document.getElementById('fixed-w'),
-                fixedH: document.getElementById('fixed-h'),
-                audioEnableToggle: document.getElementById('audio-enable-toggle')
+                fakeBgToggle: document.getElementById('fake-bg-toggle'),
+                bg2SettingsGroup: document.getElementById('bg2-settings-group'),
+                noteShowToggle: document.getElementById('note-show-toggle'),
+                noteTextInput: document.getElementById('note-text-input'),
+                noteTextColor: document.getElementById('note-text-color'),
+                noteBgColor: document.getElementById('note-bg-color'),
+                noteOpacityVal: document.getElementById('note-opacity-val'),
+                noteFontVal: document.getElementById('note-font-val')
             };
 
             const ctx = DOM.canvas.getContext('2d');
@@ -776,60 +889,72 @@
             let isInvisible = false;
             let invisEngineMode = 'box'; // 'box' or 'seg'
             let isFullCleanMode = false;
-
-            // Zoom & Scale State
-            let zoomLevel = 1.0; // 1.0 to 5.0
+            let zoomLevel = 1.0;
             let lastZoomGestureTime = 0;
+
+            // Dual Background Systems
+            let bg1Canvas = document.createElement('canvas'); // Room snapshot
+            let bg1Ctx = bg1Canvas.getContext('2d');
+            let hasBg1 = false;
+
+            let bg2Canvas = document.createElement('canvas'); // Fake BG
+            let bg2Ctx = bg2Canvas.getContext('2d');
+            let isFakeBgActive = false;
+            let hasBg2 = false;
+
+            let tempSegCanvas = document.createElement('canvas');
+            let tempSegCtx = tempSegCanvas.getContext('2d');
+
+            // Bounding Box Parameters
+            let boxScale = 2.2;
+            let smoothBox = { x: 0, y: 0, w: 0, h: 0 };
+
+            // Custom Text / Meeting Note Overlay Parameters
+            let noteSettings = {
+                show: true,
+                text: "LIVE DEMO: GESTURE INVISIBILITY",
+                textColor: "#F7F3EB",
+                bgColor: "#121212",
+                opacity: 0.85,
+                fontSize: 18
+            };
+
+            // FPS & Performance Limiter
+            let targetFps = 24;
+            let pendingFps = 24;
+            let lastFrameTime = performance.now();
+            let frameCount = 0;
+            let lastFpsUpdate = performance.now();
+            let isProcessingFrame = false;
 
             // Special Effects State
             let loveParticles = [];
-            let isLoveEffectActive = false;
             let isOkEffectActive = false;
             let okEffectTimer = null;
             let isDiscoEffectActive = false;
             let discoFrameCount = 0;
-
-            // Audio & Music Engine
-            let isAudioEnabled = true;
-            let audioPlayer = new Audio();
-            audioPlayer.loop = true;
-            let webAudioCtx = null;
-            let discoOscillator = null;
-
-            // OK Image Asset Load (Fallback gracefully if offline)
-            let okImage = new Image();
-            okImage.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=60';
-            let isOkImageLoaded = false;
-            okImage.onload = () => { isOkImageLoaded = true; };
-
-            // Background Buffers
-            let bgCanvas = document.createElement('canvas');
-            let bgCtx = bgCanvas.getContext('2d');
-            let tempSegCanvas = document.createElement('canvas');
-            let tempSegCtx = tempSegCanvas.getContext('2d');
-            let hasBackground = false;
-
-            // Box Expansion & Lock Parameters
-            let boxScale = 2.2;
-            let isSizeLocked = false;
-            let fixedWidth = 550;
-            let fixedHeight = 700;
-
-            // Smoothed Motion Vector Box
-            let smoothBox = { x: 0, y: 0, w: 0, h: 0 };
 
             // MediaPipe Cache
             let latestPoseLandmarks = null;
             let latestHandLandmarks = null;
             let latestSegmentationMask = null;
 
-            /**
-             * Initialize MediaPipe AI Models
-             */
+            // Initialize Preset BG2 Image
+            let bg2PresetImg = new Image();
+            bg2PresetImg.crossOrigin = "anonymous";
+            bg2PresetImg.src = "https://images.unsplash.com/photo-1497366216548-37526070297c?w=1280&auto=format&fit=crop&q=80"; // Office preset
+            bg2PresetImg.onload = () => {
+                bg2Canvas.width = 1280;
+                bg2Canvas.height = 720;
+                bg2Ctx.drawImage(bg2PresetImg, 0, 0, 1280, 720);
+                hasBg2 = true;
+            };
+
+            // MediaPipe AI Pipeline Setup
             const handsModel = new Hands({
                 locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
             });
-            handsModel.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.7 });
+            handsModel.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.65 });
             handsModel.onResults((results) => {
                 latestHandLandmarks = results.multiHandLandmarks ? results.multiHandLandmarks[0] : null;
                 processGestureLogic();
@@ -841,29 +966,25 @@
             poseModel.setOptions({ modelComplexity: 1, smoothLandmarks: true });
             poseModel.onResults((results) => {
                 latestPoseLandmarks = results.poseLandmarks;
-                checkAutoEmptyRoomCapture();
+                silentAutoBg1Check();
             });
 
             const segmentationModel = new SelfieSegmentation({
                 locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`
             });
-            segmentationModel.setOptions({ modelSelection: 1 });
+            segmentationModel.setOptions({ modelSelection: 0 }); // Fast mobile-optimized model
             segmentationModel.onResults((results) => {
                 latestSegmentationMask = results.segmentationMask;
             });
 
             /**
-             * Toggle Camera Feed
+             * Camera Pipeline Toggle
              */
             function toggleCamera() {
                 if (isCamActive) {
                     shutOffCamera();
                 } else {
                     initCamera();
-                    isCamActive = true;
-                    DOM.statusBadge.innerText = "CAM LIVE";
-                    DOM.statusBadge.className = "badge badge-live";
-                    DOM.btnToggleCam.innerText = "Stop WebCam";
                 }
             }
 
@@ -875,31 +996,58 @@
                 DOM.statusBadge.innerText = "CAM OFF";
                 DOM.statusBadge.className = "badge";
                 DOM.btnToggleCam.innerText = "Start WebCam";
-                stopDiscoAudio();
-                
-                // Clear Canvas to Black
+                DOM.liveFpsText.innerText = "--";
+
+                // Clear canvas to dark
                 const w = DOM.canvas.width || 1280;
                 const h = DOM.canvas.height || 720;
-                ctx.fillStyle = '#000000';
+                ctx.fillStyle = '#121212';
                 ctx.fillRect(0, 0, w, h);
             }
 
             function initCamera() {
                 cameraPipeline = new Camera(DOM.webcam, {
                     onFrame: async () => {
-                        await segmentationModel.send({ image: DOM.webcam });
-                        await poseModel.send({ image: DOM.webcam });
-                        await handsModel.send({ image: DOM.webcam });
-                        renderMainCanvas();
+                        const now = performance.now();
+                        const elapsed = now - lastFrameTime;
+
+                        if (elapsed >= (1000 / targetFps) && !isProcessingFrame) {
+                            isProcessingFrame = true;
+                            lastFrameTime = now - (elapsed % (1000 / targetFps));
+
+                            // Only process AI human tracking if tracking is NOT muted
+                            const isAiTrackingMuted = isFakeBgActive && isInvisible;
+                            
+                            if (!isAiTrackingMuted) {
+                                await segmentationModel.send({ image: DOM.webcam });
+                                await poseModel.send({ image: DOM.webcam });
+                            }
+                            await handsModel.send({ image: DOM.webcam });
+
+                            renderMainCanvas();
+                            isProcessingFrame = false;
+
+                            // Calculate FPS
+                            frameCount++;
+                            if (now - lastFpsUpdate >= 1000) {
+                                DOM.liveFpsText.innerText = frameCount;
+                                frameCount = 0;
+                                lastFpsUpdate = now;
+                            }
+                        }
                     },
                     width: 1280,
                     height: 720
                 });
                 cameraPipeline.start();
+                isCamActive = true;
+                DOM.statusBadge.innerText = "CAM LIVE";
+                DOM.statusBadge.className = "badge badge-live";
+                DOM.btnToggleCam.innerText = "Stop WebCam";
             }
 
             /**
-             * Main Canvas Rendering Loop
+             * Main Canvas Composition Loop
              */
             function renderMainCanvas() {
                 if (DOM.canvas.width !== DOM.webcam.videoWidth) {
@@ -907,8 +1055,12 @@
                     const height = DOM.webcam.videoHeight || 720;
                     DOM.canvas.width = width;
                     DOM.canvas.height = height;
-                    bgCanvas.width = width;
-                    bgCanvas.height = height;
+                    bg1Canvas.width = width;
+                    bg1Canvas.height = height;
+                    if (!hasBg2) {
+                        bg2Canvas.width = width;
+                        bg2Canvas.height = height;
+                    }
                     tempSegCanvas.width = width;
                     tempSegCanvas.height = height;
                 }
@@ -919,43 +1071,66 @@
                 ctx.save();
                 ctx.clearRect(0, 0, w, h);
 
-                // Apply Zoom Transformation
-                if (zoomLevel > 1.0) {
-                    const zoomW = w / zoomLevel;
-                    const zoomH = h / zoomLevel;
-                    const cropX = (w - zoomW) / 2;
-                    const cropY = (h - zoomH) / 2;
-                    ctx.drawImage(DOM.webcam, cropX, cropY, zoomW, zoomH, 0, 0, w, h);
-                } else {
-                    ctx.drawImage(DOM.webcam, 0, 0, w, h);
-                }
+                // Check BG2 vs BG1 Logic
+                if (isFakeBgActive) {
+                    // BG2 Mode Active
+                    if (isInvisible) {
+                        // INVISIBLE in BG2: Mute Human Tracking and draw 100% full BG2
+                        ctx.drawImage(bg2Canvas, 0, 0, w, h);
+                    } else {
+                        // VISIBLE in BG2: Composite human over BG2
+                        if (latestSegmentationMask) {
+                            tempSegCtx.clearRect(0, 0, w, h);
+                            tempSegCtx.drawImage(latestSegmentationMask, 0, 0, w, h);
 
-                // Invisibility Rendering
-                if (isInvisible && hasBackground) {
-                    if (invisEngineMode === 'box') {
-                        renderBoundingBoxInvisibility(w, h);
-                    } else if (invisEngineMode === 'seg' && latestSegmentationMask) {
-                        renderSegmentationInvisibility(w, h);
+                            // Draw video feed zoomed
+                            ctx.drawImage(DOM.webcam, 0, 0, w, h);
+                            ctx.globalCompositeOperation = 'destination-in';
+                            ctx.drawImage(tempSegCanvas, 0, 0, w, h);
+                            ctx.globalCompositeOperation = 'destination-over';
+                            ctx.drawImage(bg2Canvas, 0, 0, w, h);
+                        } else {
+                            ctx.drawImage(DOM.webcam, 0, 0, w, h);
+                        }
+                    }
+                } else {
+                    // Standard Real Room BG1 Mode
+                    if (zoomLevel > 1.0) {
+                        const zoomW = w / zoomLevel;
+                        const zoomH = h / zoomLevel;
+                        const cropX = (w - zoomW) / 2;
+                        const cropY = (h - zoomH) / 2;
+                        ctx.drawImage(DOM.webcam, cropX, cropY, zoomW, zoomH, 0, 0, w, h);
+                    } else {
+                        ctx.drawImage(DOM.webcam, 0, 0, w, h);
+                    }
+
+                    if (isInvisible && hasBg1) {
+                        if (invisEngineMode === 'box') {
+                            renderBoundingBoxInvisibility(w, h);
+                        } else if (invisEngineMode === 'seg' && latestSegmentationMask) {
+                            renderSegmentationInvisibility(w, h);
+                        }
                     }
                 }
 
-                // Special Overlays & Particle Effects Rendering
+                // Render Canvas Overlays & Effects
                 renderLoveParticles(w, h);
                 renderOkOverlay(w, h);
                 renderDiscoLights(w, h);
+                renderNoteOverlay(w, h);
 
                 ctx.restore();
             }
 
             /**
-             * Algoritma Bounding Box Raksasa Multi-Point
+             * Invisibility Mask Renderers
              */
             function renderBoundingBoxInvisibility(w, h) {
                 let targetX = w / 4, targetY = h / 6, targetW = w / 2, targetH = h * 0.8;
 
                 if (latestPoseLandmarks) {
                     let minX = 1.0, maxX = 0.0, minY = 1.0, maxY = 0.0;
-                    
                     const keyIndices = [0, 2, 5, 7, 8, 11, 12, 13, 14, 15, 16, 23, 24];
                     keyIndices.forEach(idx => {
                         const lm = latestPoseLandmarks[idx];
@@ -973,14 +1148,8 @@
                         let centerX = (minX + (maxX - minX) / 2) * w;
                         let centerY = (minY + (maxY - minY) / 2) * h;
 
-                        if (isSizeLocked) {
-                            targetW = fixedWidth;
-                            targetH = fixedHeight;
-                        } else {
-                            targetW = boxW * boxScale;
-                            targetH = boxH * boxScale;
-                        }
-
+                        targetW = boxW * boxScale;
+                        targetH = boxH * boxScale;
                         targetX = centerX - (targetW / 2);
                         targetY = centerY - (targetH / 2);
                     }
@@ -995,13 +1164,10 @@
                 ctx.beginPath();
                 ctx.rect(smoothBox.x, smoothBox.y, smoothBox.w, smoothBox.h);
                 ctx.clip();
-                ctx.drawImage(bgCanvas, 0, 0, w, h);
+                ctx.drawImage(bg1Canvas, 0, 0, w, h);
                 ctx.restore();
             }
 
-            /**
-             * Algoritma Full Body Segmentation Mask
-             */
             function renderSegmentationInvisibility(w, h) {
                 tempSegCtx.clearRect(0, 0, w, h);
                 tempSegCtx.drawImage(latestSegmentationMask, 0, 0, w, h);
@@ -1010,7 +1176,42 @@
                 ctx.globalCompositeOperation = 'destination-out';
                 ctx.drawImage(tempSegCanvas, 0, 0, w, h);
                 ctx.globalCompositeOperation = 'destination-over';
-                ctx.drawImage(bgCanvas, 0, 0, w, h);
+                ctx.drawImage(bg1Canvas, 0, 0, w, h);
+                ctx.restore();
+            }
+
+            /**
+             * Canvas Meeting Notes Overlay Renderer
+             */
+            function renderNoteOverlay(w, h) {
+                if (!noteSettings.show || !noteSettings.text.trim()) return;
+
+                ctx.save();
+                ctx.font = `600 ${noteSettings.fontSize}px -apple-system, sans-serif`;
+                
+                const textWidth = ctx.measureText(noteSettings.text).width;
+                const paddingX = 16;
+                const paddingY = 10;
+                const boxW = textWidth + (paddingX * 2);
+                const boxH = noteSettings.fontSize + (paddingY * 2);
+                const posX = 20;
+                const posY = h - boxH - 20;
+
+                // Draw background box with customizable opacity & color
+                ctx.globalAlpha = noteSettings.opacity;
+                ctx.fillStyle = noteSettings.bgColor;
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.roundRect(posX, posY, boxW, boxH, 8);
+                ctx.fill();
+                ctx.stroke();
+
+                // Draw note text
+                ctx.globalAlpha = 1.0;
+                ctx.fillStyle = noteSettings.textColor;
+                ctx.textBaseline = "middle";
+                ctx.fillText(noteSettings.text, posX + paddingX, posY + (boxH / 2));
                 ctx.restore();
             }
 
@@ -1018,13 +1219,11 @@
              * Special Effects Renderers
              */
             function triggerLoveEffect() {
-                isLoveEffectActive = true;
-                for (let i = 0; i < 25; i++) {
+                for (let i = 0; i < 20; i++) {
                     loveParticles.push({
                         x: Math.random() * (DOM.canvas.width || 1280),
-                        y: -Math.random() * 200,
+                        y: -Math.random() * 100,
                         speed: 2 + Math.random() * 4,
-                        size: 20 + Math.random() * 24,
                         opacity: 1
                     });
                 }
@@ -1033,15 +1232,13 @@
             function renderLoveParticles(w, h) {
                 if (loveParticles.length === 0) return;
                 ctx.save();
-                ctx.font = '28px serif';
+                ctx.font = '24px serif';
                 for (let i = loveParticles.length - 1; i >= 0; i--) {
                     const p = loveParticles[i];
                     p.y += p.speed;
                     ctx.globalAlpha = p.opacity;
                     ctx.fillText('❤️', p.x, p.y);
-                    if (p.y > h + 50) {
-                        loveParticles.splice(i, 1);
-                    }
+                    if (p.y > h + 30) loveParticles.splice(i, 1);
                 }
                 ctx.restore();
             }
@@ -1055,97 +1252,41 @@
             function renderOkOverlay(w, h) {
                 if (!isOkEffectActive) return;
                 ctx.save();
-                
-                // Draw OK Card Badge Center
-                const boxW = 280;
-                const boxH = 120;
-                const rectX = (w - boxW) / 2;
-                const rectY = h * 0.15;
+                const boxW = 240, boxH = 90;
+                const rectX = (w - boxW) / 2, rectY = h * 0.15;
 
-                ctx.fillStyle = 'rgba(18, 18, 18, 0.88)';
+                ctx.fillStyle = 'rgba(18, 18, 18, 0.9)';
                 ctx.strokeStyle = '#F7F3EB';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
-                ctx.roundRect(rectX, rectY, boxW, boxH, 12);
+                ctx.roundRect(rectX, rectY, boxW, boxH, 10);
                 ctx.fill();
                 ctx.stroke();
 
                 ctx.fillStyle = '#F7F3EB';
-                ctx.font = 'bold 36px sans-serif';
+                ctx.font = 'bold 30px sans-serif';
                 ctx.textAlign = 'center';
-                ctx.fillText('OK 👌', rectX + boxW / 2, rectY + 70);
-
+                ctx.fillText('OK 👌', rectX + boxW / 2, rectY + 55);
                 ctx.restore();
             }
 
             function triggerDiscoEffect() {
                 isDiscoEffectActive = true;
-                playDiscoAudio();
-                setTimeout(() => {
-                    isDiscoEffectActive = false;
-                    stopDiscoAudio();
-                }, 5000);
+                setTimeout(() => { isDiscoEffectActive = false; }, 4000);
             }
 
             function renderDiscoLights(w, h) {
                 if (!isDiscoEffectActive) return;
                 discoFrameCount++;
                 ctx.save();
-                
-                // Disco Strobing Spotlights
-                const colors = ['rgba(255, 0, 100, 0.25)', 'rgba(0, 255, 200, 0.25)', 'rgba(255, 230, 0, 0.25)', 'rgba(150, 0, 255, 0.25)'];
-                const currentColor = colors[Math.floor(discoFrameCount / 10) % colors.length];
-
-                ctx.fillStyle = currentColor;
+                const colors = ['rgba(255, 0, 100, 0.2)', 'rgba(0, 255, 200, 0.2)', 'rgba(255, 230, 0, 0.2)'];
+                ctx.fillStyle = colors[Math.floor(discoFrameCount / 10) % colors.length];
                 ctx.fillRect(0, 0, w, h);
-
-                // Disco Ball Graphic Top Center
-                ctx.fillStyle = '#F7F3EB';
-                ctx.beginPath();
-                ctx.arc(w / 2, 40, 30, 0, Math.PI * 2);
-                ctx.fill();
-
                 ctx.restore();
             }
 
             /**
-             * Audio Engine & Sound Playback
-             */
-            function playDiscoAudio() {
-                if (!isAudioEnabled) return;
-                if (audioPlayer.src && audioPlayer.src !== '') {
-                    audioPlayer.play().catch(e => {});
-                } else {
-                    // Fallback Web Audio Synthesizer Beat
-                    try {
-                        if (!webAudioCtx) webAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                        if (webAudioCtx.state === 'suspended') webAudioCtx.resume();
-                        discoOscillator = webAudioCtx.createOscillator();
-                        const gainNode = webAudioCtx.createGain();
-                        discoOscillator.type = 'sawtooth';
-                        discoOscillator.frequency.setValueAtTime(220, webAudioCtx.currentTime);
-                        gainNode.gain.setValueAtTime(0.1, webAudioCtx.currentTime);
-                        discoOscillator.connect(gainNode);
-                        gainNode.connect(webAudioCtx.destination);
-                        discoOscillator.start();
-                    } catch(e){}
-                }
-            }
-
-            function stopDiscoAudio() {
-                try {
-                    audioPlayer.pause();
-                    audioPlayer.currentTime = 0;
-                    if (discoOscillator) {
-                        discoOscillator.stop();
-                        discoOscillator.disconnect();
-                        discoOscillator = null;
-                    }
-                } catch(e){}
-            }
-
-            /**
-             * Gesture Engine Tracker
+             * Gesture Detection Logic
              */
             function processGestureLogic() {
                 if (!latestHandLandmarks) {
@@ -1162,62 +1303,37 @@
 
                 let gestureFound = "unknown";
 
-                // Gesture Classifications
-                if (!indexUp && middleUp && !ringUp && !pinkyUp) {
-                    // 🖕 Middle Finger / F*ck Up
-                    gestureFound = "fuck_off";
-                    DOM.detectedGesture.innerText = "🖕 Shut Off Cam";
+                // Gesture: 🖕 Middle Finger / Fuck Up (Shut off camera)
+                if (middleUp && !indexUp && !ringUp && !pinkyUp) {
+                    DOM.detectedGesture.innerText = "🖕 Shutting Cam";
                     shutOffCamera();
                     return;
-                } else if (indexUp && middleUp && !ringUp && !pinkyUp) {
-                    // ✌️ 2 Fingers
+                }
+
+                if (indexUp && middleUp && !ringUp && !pinkyUp) {
                     gestureFound = "2_fingers";
                     DOM.detectedGesture.innerText = "✌️ 2 Jari";
                 } else if (indexUp && !middleUp && !ringUp && !pinkyUp) {
-                    // ☝️ Pointing Index
                     gestureFound = "pointing";
                     DOM.detectedGesture.innerText = "☝️ Telunjuk";
                 } else if (indexUp && middleUp && ringUp && pinkyUp) {
-                    // 🤚 Open Palm
                     gestureFound = "open_palm";
                     DOM.detectedGesture.innerText = "🤚 Telapak Tangan";
                 } else if (!indexUp && !middleUp && !ringUp && !pinkyUp) {
-                    // ✊ Fist
                     gestureFound = "fist";
                     DOM.detectedGesture.innerText = "✊ Kepal";
                 } else if (indexUp && !middleUp && !ringUp && pinkyUp) {
-                    // 🤟 Rock / Disco Sign
                     gestureFound = "rock";
                     DOM.detectedGesture.innerText = "🤟 Disco Party!";
                     triggerDiscoEffect();
                 } else if (indexUp && thumbUp && !middleUp && !ringUp && !pinkyUp) {
-                    // 🫰 Finger Heart / Pinch
                     gestureFound = "heart";
                     DOM.detectedGesture.innerText = "🫰 Finger Heart ❤️";
                     triggerLoveEffect();
                 } else if (!indexUp && !middleUp && ringUp && pinkyUp && thumbUp) {
-                    // 👌 OK Sign
                     gestureFound = "ok";
                     DOM.detectedGesture.innerText = "👌 OK Sign";
                     triggerOkEffect();
-                } else if (indexUp && middleUp && ringUp && pinkyUp && thumbUp) {
-                    // 👐 Spreading / Open Hands (Zoom Out)
-                    const now = Date.now();
-                    if (now - lastZoomGestureTime > 300) {
-                        setZoomLevel(Math.max(1.0, zoomLevel - 0.2));
-                        lastZoomGestureTime = now;
-                    }
-                    DOM.detectedGesture.innerText = "👐 Zoom Out";
-                } else if (!indexUp && !middleUp && !ringUp && !pinkyUp && thumbUp) {
-                    // 🤏 Pinching Hand (Zoom In)
-                    const now = Date.now();
-                    if (now - lastZoomGestureTime > 300) {
-                        setZoomLevel(Math.min(5.0, zoomLevel + 0.2));
-                        lastZoomGestureTime = now;
-                    }
-                    DOM.detectedGesture.innerText = "🤏 Zoom In";
-                } else {
-                    DOM.detectedGesture.innerText = "Detecting...";
                 }
 
                 const hideTrigger = DOM.gestureHide.value;
@@ -1241,38 +1357,14 @@
                 }
             }
 
-            function setZoomLevel(val) {
-                zoomLevel = parseFloat(val);
-                DOM.zoomVal.innerText = `${zoomLevel.toFixed(1)}x`;
-                DOM.camZoomSlider.value = zoomLevel;
-            }
-
-            /**
-             * Toggle Clean Mode (Full Screen Without Indicators)
-             */
-            function toggleFullCleanMode() {
-                isFullCleanMode = !isFullCleanMode;
-                if (isFullCleanMode) {
-                    document.body.classList.add('full-clean-mode');
-                } else {
-                    document.body.classList.remove('full-clean-mode');
+            // Silent Auto Capture for Room BG1 Snapshot
+            function silentAutoBg1Check() {
+                if (!hasBg1 && isCamActive && !latestPoseLandmarks) {
+                    bg1Ctx.drawImage(DOM.webcam, 0, 0, bg1Canvas.width, bg1Canvas.height);
+                    hasBg1 = true;
                 }
             }
 
-            // Keyboard Shortcuts Handler (1-5 Zoom, F/Esc Full Clean Mode)
-            window.addEventListener('keydown', (e) => {
-                if (['1', '2', '3', '4', '5'].includes(e.key)) {
-                    setZoomLevel(parseFloat(e.key));
-                } else if (e.key.toLowerCase() === 'f') {
-                    toggleFullCleanMode();
-                } else if (e.key === 'Escape' && isFullCleanMode) {
-                    toggleFullCleanMode();
-                }
-            });
-
-            /**
-             * Background Capture & Interactive Ready Flow
-             */
             function startReadyFlow() {
                 DOM.countdownOverlay.classList.remove('hidden');
                 let count = 3;
@@ -1285,19 +1377,19 @@
                     } else {
                         clearInterval(timer);
                         DOM.countdownOverlay.classList.add('hidden');
-                        captureBgSnapshot();
+                        captureBg1Snapshot();
                     }
                 }, 1000);
             }
 
-            function captureBgSnapshot() {
-                bgCtx.drawImage(DOM.webcam, 0, 0, bgCanvas.width, bgCanvas.height);
-                DOM.bgPreviewImg.src = bgCanvas.toDataURL('image/png');
+            function captureBg1Snapshot() {
+                bg1Ctx.drawImage(DOM.webcam, 0, 0, bg1Canvas.width, bg1Canvas.height);
+                DOM.bgPreviewImg.src = bg1Canvas.toDataURL('image/png');
                 DOM.confirmModal.classList.remove('hidden');
             }
 
             function keepBg() {
-                hasBackground = true;
+                hasBg1 = true;
                 DOM.confirmModal.classList.add('hidden');
             }
 
@@ -1306,46 +1398,107 @@
                 startReadyFlow();
             }
 
-            function checkAutoEmptyRoomCapture() {
-                if (!hasBackground && isCamActive && !latestPoseLandmarks) {
-                    bgCtx.drawImage(DOM.webcam, 0, 0, bgCanvas.width, bgCanvas.height);
-                    hasBackground = true;
+            /**
+             * Fake Background (BG2) Operations
+             */
+            function toggleFakeBg(checked) {
+                isFakeBgActive = checked;
+                if (checked) {
+                    DOM.bg2SettingsGroup.classList.remove('disabled-group');
+                } else {
+                    DOM.bg2SettingsGroup.classList.add('disabled-group');
                 }
             }
 
-            function uploadBackground(event) {
+            function selectBg2Preset(val) {
+                const presets = {
+                    office: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=1280&auto=format&fit=crop&q=80",
+                    studio: "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=1280&auto=format&fit=crop&q=80",
+                    library: "https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=1280&auto=format&fit=crop&q=80"
+                };
+
+                if (presets[val]) {
+                    const img = new Image();
+                    img.crossOrigin = "anonymous";
+                    img.src = presets[val];
+                    img.onload = () => {
+                        bg2Canvas.width = DOM.canvas.width || 1280;
+                        bg2Canvas.height = DOM.canvas.height || 720;
+                        bg2Ctx.drawImage(img, 0, 0, bg2Canvas.width, bg2Canvas.height);
+                        hasBg2 = true;
+                    };
+                }
+            }
+
+            function uploadCustomBackground(event) {
                 const file = event.target ? event.target.files[0] : event;
                 if (file && file.type.startsWith('image/')) {
                     const img = new Image();
                     img.onload = function() {
-                        bgCtx.drawImage(img, 0, 0, bgCanvas.width, bgCanvas.height);
-                        hasBackground = true;
+                        bg2Canvas.width = DOM.canvas.width || 1280;
+                        bg2Canvas.height = DOM.canvas.height || 720;
+                        bg2Ctx.drawImage(img, 0, 0, bg2Canvas.width, bg2Canvas.height);
+                        hasBg2 = true;
+                        DOM.fakeBgToggle.checked = true;
+                        toggleFakeBg(true);
                     };
                     img.src = URL.createObjectURL(file);
                 }
             }
 
-            function uploadAudioFile(event) {
-                const file = event.target.files[0];
-                if (file) {
-                    audioPlayer.src = URL.createObjectURL(file);
+            /**
+             * FPS Limiter & Hardware Warning
+             */
+            function setFpsTarget(val) {
+                const target = parseInt(val);
+                if (target > 30) {
+                    pendingFps = target;
+                    DOM.warningMsg.innerText = `Menyetel target FPS ke ${target} FPS membutuhkan spesifikasi GPU/CPU dan kamera yang mendukung High Refresh Rate. Komputer/HP low-end mungkin mengalami lag.`;
+                    DOM.warningModal.classList.remove('hidden');
+                } else {
+                    targetFps = target;
                 }
             }
 
-            function setAudioUrl(url) {
-                if (url && url.trim() !== '') {
-                    audioPlayer.src = url.trim();
-                }
+            function confirmFpsUpgrade() {
+                targetFps = pendingFps;
+                DOM.warningModal.classList.add('hidden');
             }
 
-            function toggleAudioEnable(checked) {
-                isAudioEnabled = checked;
-                if (!checked) stopDiscoAudio();
+            function cancelFpsUpgrade() {
+                document.getElementById('fps-select').value = "24";
+                targetFps = 24;
+                DOM.warningModal.classList.add('hidden');
             }
 
             /**
-             * Drag & Drop Handler Setup
+             * UI Navigation & Theme Logic
              */
+            function switchTab(tabId, btnEl) {
+                document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+                document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+                document.getElementById(tabId).classList.remove('hidden');
+                btnEl.classList.add('active');
+            }
+
+            function setTheme(themeName) {
+                document.body.className = themeName;
+            }
+
+            function toggleFullCleanMode() {
+                isFullCleanMode = !isFullCleanMode;
+                if (isFullCleanMode) {
+                    document.body.classList.add('full-clean-mode');
+                } else {
+                    document.body.classList.remove('full-clean-mode');
+                }
+            }
+
+            function toggleMinimizePanel() {
+                DOM.panelBody.classList.toggle('hidden');
+            }
+
+            // Drag & Drop Setup
             ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(evtName => {
                 DOM.dropZone.addEventListener(evtName, (e) => { e.preventDefault(); e.stopPropagation(); }, false);
             });
@@ -1357,59 +1510,34 @@
             });
             DOM.dropZone.addEventListener('drop', (e) => {
                 const files = e.dataTransfer.files;
-                if (files.length > 0) uploadBackground(files[0]);
+                if (files.length > 0) uploadCustomBackground(files[0]);
             }, false);
 
-            /**
-             * Control Panel Action Listeners
-             */
-            function setInvisMode(mode) {
-                invisEngineMode = mode;
-                if (mode === 'box') {
-                    DOM.engineText.innerText = "Bounding Box";
-                    DOM.btnModeBox.className = "btn-mode active";
-                    DOM.btnModeSeg.className = "btn-mode";
-                } else {
-                    DOM.engineText.innerText = "Full Body Seg";
-                    DOM.btnModeSeg.className = "btn-mode active";
-                    DOM.btnModeBox.className = "btn-mode";
+            // Key Bindings (1-5 Zoom, F/Esc Clean Mode)
+            window.addEventListener('keydown', (e) => {
+                if (['1', '2', '3', '4', '5'].includes(e.key)) {
+                    zoomLevel = parseFloat(e.key);
+                } else if (e.key.toLowerCase() === 'f') {
+                    toggleFullCleanMode();
+                } else if (e.key === 'Escape' && isFullCleanMode) {
+                    toggleFullCleanMode();
                 }
-            }
-
-            function updateBoxScale(val) {
-                boxScale = parseFloat(val);
-                DOM.scaleVal.innerText = `${boxScale.toFixed(1)}x`;
-            }
-
-            function toggleLockSize(checked) {
-                isSizeLocked = checked;
-                if (checked) {
-                    DOM.lockDimensions.classList.remove('disabled-group');
-                } else {
-                    DOM.lockDimensions.classList.add('disabled-group');
-                }
-            }
-
-            function updateFixedDim() {
-                fixedWidth = parseInt(DOM.fixedW.value) || 550;
-                fixedHeight = parseInt(DOM.fixedH.value) || 700;
-            }
+            });
 
             return {
                 toggleCamera,
-                setInvisMode,
-                updateBoxScale,
-                setZoomLevel,
-                toggleLockSize,
-                updateFixedDim,
-                startReadyFlow,
-                keepBg,
-                retakeBg,
-                uploadBackground,
-                toggleFullCleanMode,
-                uploadAudioFile,
-                setAudioUrl,
-                toggleAudioEnable
+                setInvisMode: (m) => invisEngineMode = m,
+                updateBoxScale: (v) => { boxScale = parseFloat(v); DOM.scaleVal.innerText = `${boxScale}x`; },
+                startReadyFlow, keepBg, retakeBg,
+                toggleFakeBg, selectBg2Preset, uploadCustomBackground,
+                setFpsTarget, confirmFpsUpgrade, cancelFpsUpgrade,
+                switchTab, setTheme, toggleFullCleanMode, toggleMinimizePanel,
+                toggleNoteShow: (c) => noteSettings.show = c,
+                updateNoteText: (v) => noteSettings.text = v,
+                updateNoteTextColor: (v) => noteSettings.textColor = v,
+                updateNoteBgColor: (v) => noteSettings.bgColor = v,
+                updateNoteOpacity: (v) => { noteSettings.opacity = v / 100; DOM.noteOpacityVal.innerText = `${v}%`; },
+                updateNoteFontSize: (v) => { noteSettings.fontSize = parseInt(v); DOM.noteFontVal.innerText = `${v}px`; }
             };
         })();
     </script>
